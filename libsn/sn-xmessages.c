@@ -46,9 +46,6 @@ typedef struct
   int allocated;
 } SnXmessage;
 
-static SnList *xmessage_funcs = NULL;
-static SnList *pending_messages = NULL;
-
 void
 sn_internal_add_xmessage_func (SnDisplay      *display,
                                int             screen,
@@ -59,10 +56,11 @@ sn_internal_add_xmessage_func (SnDisplay      *display,
                                SnFreeFunc      free_data_func)
 {
   SnXmessageHandler *handler;
+  SnList *xmessage_funcs;
   
-  if (xmessage_funcs == NULL)
-    xmessage_funcs = sn_list_new ();
-
+  sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
+                                         NULL);
+  
   handler = sn_new0 (SnXmessageHandler, 1);
 
   handler->xdisplay = sn_display_get_x_display (display);
@@ -113,7 +111,11 @@ sn_internal_remove_xmessage_func (SnDisplay      *display,
                                   void           *func_data)
 {
   FindHandlerData fhd;
+  SnList *xmessage_funcs;
 
+  sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
+                                         NULL);
+  
   fhd.func = func;
   fhd.func_data = func_data;
   fhd.handler = NULL;
@@ -252,7 +254,11 @@ some_handler_handles_event (SnDisplay *display,
                             XEvent    *xevent)
 {
   HandlerForAtomData hfad;
+  SnList *xmessage_funcs;
 
+  sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
+                                         NULL);
+  
   hfad.atom = xevent->xclient.message_type;
   hfad.xdisplay = sn_display_get_x_display (display);
   hfad.xwindow = xevent->xclient.window;
@@ -299,6 +305,7 @@ add_event_to_messages (SnDisplay *display,
   const char *src_end;
   char *dest;
   sn_bool_t completed;
+  SnList *pending_messages;
   
   /* We don't want screwy situations to end up causing us to allocate
    * infinite memory. Cap the length of a message.
@@ -309,6 +316,9 @@ add_event_to_messages (SnDisplay *display,
   fmd.xevent = xevent;
   fmd.message = NULL;
 
+  sn_internal_display_get_xmessage_data (display, NULL,
+                                         &pending_messages);
+  
   if (pending_messages)
     sn_list_foreach (pending_messages, find_message_foreach, &fmd);
 
@@ -323,9 +333,6 @@ add_event_to_messages (SnDisplay *display,
       message->xwindow = xevent->xclient.window;
       message->message = NULL;
       message->allocated = 0;
-
-      if (pending_messages == NULL)
-        pending_messages = sn_list_new ();
 
       sn_list_prepend (pending_messages, message);
     }
@@ -428,6 +435,10 @@ sn_internal_xmessage_process_event (SnDisplay *display,
       if (sn_internal_utf8_validate (message->message, -1))
         {
           MessageDispatchData mdd;
+          SnList *xmessage_funcs;
+          
+          sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
+                                                 NULL);
           
           mdd.display = display;
           mdd.message = message;

@@ -1,3 +1,12 @@
+2003-01-16  Havoc Pennington  <hp@redhat.com>
+
+	* libsn/sn-xmessages.c: delete global variables for xmessage_funcs
+	and pending_messages, use per-display data.
+
+	* libsn/sn-common.c (sn_internal_display_get_xmessage_data): store
+	the list of xmessage handlers and pending messages per-display, 
+	so things work halfway correctly
+
 2002-12-15  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-launchee.c (sn_launchee_context_setup_window):

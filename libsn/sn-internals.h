@@ -53,6 +53,10 @@ SN_BEGIN_DECLS
 Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
                                                 int                     number);
 
+void       sn_internal_display_get_xmessage_data (SnDisplay              *display,
+                                                  SnList                **funcs,
+                                                  SnList                **pending);
+
 /* --- From sn-monitor.c --- */
 sn_bool_t sn_internal_monitor_process_event (SnDisplay *display,
                                              XEvent    *xevent);

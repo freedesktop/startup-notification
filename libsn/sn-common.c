@@ -34,6 +34,8 @@ struct SnDisplay
   Screen **screens;
   SnDisplayErrorTrapPush push_trap_func;
   SnDisplayErrorTrapPop  pop_trap_func;
+  SnList *xmessage_funcs;
+  SnList *pending_messages;
 };
 
 /**
@@ -104,6 +106,10 @@ sn_display_unref (SnDisplay *display)
   display->refcount -= 1;
   if (display->refcount == 0)
     {
+      if (display->xmessage_funcs)
+        sn_list_free (display->xmessage_funcs);
+      if (display->pending_messages)
+        sn_list_free (display->pending_messages);
       sn_free (display->screens);
       sn_free (display);
     }
@@ -201,5 +207,22 @@ sn_display_error_trap_pop  (SnDisplay *display)
 {
   if (display->pop_trap_func)
     (* display->pop_trap_func) (display, display->xdisplay);
+}
+
+void
+sn_internal_display_get_xmessage_data (SnDisplay              *display,
+                                       SnList                **funcs,
+                                       SnList                **pending)
+{
+  if (display->xmessage_funcs == NULL)
+    display->xmessage_funcs = sn_list_new ();
+
+  if (display->pending_messages == NULL)
+    display->pending_messages = sn_list_new ();
+  
+  if (funcs)
+    *funcs = display->xmessage_funcs;
+  if (pending)
+    *pending = display->pending_messages;
 }
 
