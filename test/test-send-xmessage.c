@@ -56,7 +56,7 @@ main (int argc, char **argv)
                             error_trap_push,
                             error_trap_pop);
   
-  sn_internal_broadcast_xmessage (display,
+  sn_internal_broadcast_xmessage (display, DefaultScreen (xdisplay),
                                   argv[1],
                                   argv[2]);
   

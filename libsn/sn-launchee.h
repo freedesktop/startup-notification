@@ -34,15 +34,13 @@ SN_BEGIN_DECLS
 typedef struct SnLauncheeContext SnLauncheeContext;
 
 SnLauncheeContext* sn_launchee_context_new                  (SnDisplay         *display,
-                                                             const char        *launch_id,
-                                                             Window             launch_window);
-SnLauncheeContext* sn_launchee_context_new_from_environment (SnDisplay         *display);
+                                                             int                screen,
+                                                             const char        *startup_id);
+SnLauncheeContext* sn_launchee_context_new_from_environment (SnDisplay         *display,
+                                                             int                screen);
 void               sn_launchee_context_ref                  (SnLauncheeContext *context);
 void               sn_launchee_context_unref                (SnLauncheeContext *context);
-Window             sn_launchee_context_get_launch_window    (SnLauncheeContext *context);
-const char*        sn_launchee_context_get_launch_id        (SnLauncheeContext *context);
-void               sn_launchee_context_pulse                (SnLauncheeContext *context);
-void               sn_launchee_context_cancel               (SnLauncheeContext *context);
+const char*        sn_launchee_context_get_startup_id       (SnLauncheeContext *context);
 void               sn_launchee_context_complete             (SnLauncheeContext *context);
 void               sn_launchee_context_setup_window         (SnLauncheeContext *context,
                                                              Window             xwindow);

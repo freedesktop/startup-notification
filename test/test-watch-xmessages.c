@@ -32,6 +32,7 @@
 static void
 message_func (SnDisplay       *display,
               const char      *message_type,
+              Window           xwindow,
               const char      *message,
               void            *user_data)
 {
@@ -100,7 +101,7 @@ main (int argc, char **argv)
                             error_trap_push,
                             error_trap_pop);
 
-  sn_internal_add_xmessage_func (display,
+  sn_internal_add_xmessage_func (display, DefaultScreen (xdisplay),
                                  argv[1],
                                  message_func,
                                  NULL, NULL);

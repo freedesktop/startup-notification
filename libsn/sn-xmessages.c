@@ -29,6 +29,7 @@
 typedef struct
 {
   Display       *xdisplay;
+  Window         root;
   Atom           type_atom;
   char          *message_type;
   SnXmessageFunc func;
@@ -49,6 +50,7 @@ static SnList *pending_messages = NULL;
 
 void
 sn_internal_add_xmessage_func (SnDisplay      *display,
+                               int             screen,
                                const char     *message_type,
                                SnXmessageFunc  func,
                                void           *func_data,
@@ -62,6 +64,7 @@ sn_internal_add_xmessage_func (SnDisplay      *display,
   handler = sn_new0 (SnXmessageHandler, 1);
 
   handler->xdisplay = sn_display_get_x_display (display);
+  handler->root = RootWindow (handler->xdisplay, screen);
   handler->type_atom = sn_internal_atom_get (display, message_type);
   handler->message_type = sn_internal_strdup (message_type);
   handler->func= func;
@@ -76,6 +79,7 @@ typedef struct
   const char *message_type;
   SnXmessageFunc func;
   void *func_data;
+  Window root;
   SnXmessageHandler *handler;
 } FindHandlerData;
 
@@ -88,6 +92,7 @@ find_handler_foreach (void *value,
 
   if (handler->func == fhd->func &&
       handler->func_data == fhd->func_data &&
+      handler->root == fhd->root &&
       strcmp (fhd->message_type, handler->message_type) == 0)
     {
       fhd->handler = handler;
@@ -99,6 +104,7 @@ find_handler_foreach (void *value,
 
 void
 sn_internal_remove_xmessage_func (SnDisplay      *display,
+                                  int             screen,
                                   const char     *message_type,
                                   SnXmessageFunc  func,
                                   void           *func_data)
@@ -108,7 +114,8 @@ sn_internal_remove_xmessage_func (SnDisplay      *display,
   fhd.func = func;
   fhd.func_data = func_data;
   fhd.handler = NULL;
-
+  fhd.root = RootWindow (sn_display_get_x_display (display), screen);
+  
   if (xmessage_funcs != NULL)
     sn_list_foreach (xmessage_funcs, find_handler_foreach, &fhd);
 
@@ -127,6 +134,7 @@ sn_internal_remove_xmessage_func (SnDisplay      *display,
 
 void
 sn_internal_broadcast_xmessage   (SnDisplay      *display,
+                                  int             screen,
                                   const char     *message_type,
                                   const char     *message)
 {
@@ -201,7 +209,7 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
           }
         
         XSendEvent (xdisplay,
-                    target_xwindow,
+                    RootWindow (xdisplay, screen),
                     False,
                     PropertyChangeMask,
                     &xevent);
@@ -216,6 +224,7 @@ typedef struct
 {
   Display *xdisplay;
   Atom atom;
+  Window xwindow;
   sn_bool_t found_handler;
 } HandlerForAtomData;
 
@@ -227,7 +236,8 @@ handler_for_atom_foreach (void *value,
   HandlerForAtomData *hfad = data;
 
   if (handler->xdisplay == hfad->xdisplay &&
-      handler->type_atom == hfad->atom)
+      handler->type_atom == hfad->atom &&
+      handler->root == hfad->xwindow)
     {
       hfad->found_handler = TRUE;
       return FALSE;
@@ -244,6 +254,7 @@ some_handler_handles_event (SnDisplay *display,
 
   hfad.atom = xevent->xclient.message_type;
   hfad.xdisplay = sn_display_get_x_display (display);
+  hfad.xwindow = xevent->xclient.window;
   hfad.found_handler = FALSE;
 
   if (xmessage_funcs)
@@ -380,6 +391,7 @@ dispatch_message_foreach (void *value,
 
   (* handler->func) (mdd->display,
                      handler->message_type,
+                     mdd->message->xwindow,
                      mdd->message->message,
                      handler->func_data);
   
@@ -430,6 +442,11 @@ sn_internal_xmessage_process_event (SnDisplay *display,
                              dispatch_message_foreach,
                              &mdd);
         }
+      else
+        {
+          /* FIXME don't use fprintf, use something pluggable */
+          fprintf (stderr, "Bad UTF-8 in startup notification message\n");
+        }
 
       sn_free (message->message);
       sn_free (message);
@@ -439,26 +456,9 @@ sn_internal_xmessage_process_event (SnDisplay *display,
 }
 
 static void
-append_to_string (char      **append_to,
-                  int        *current_len,
-                  const char *append)
-{
-  int len;
-  char *end;
-  
-  len = strlen (append);
-
-  *append_to = sn_realloc (*append_to, *current_len + len + 1);
-  
-  end = *append_to + *current_len;
-  strcpy (end, append);
-  *current_len = *current_len + len;  
-}
-
-static void
-append_to_string_escaped (char      **append_to,
-                          int        *current_len,
-                          const char *append)
+sn_internal_append_to_string_escaped (char      **append_to,
+                                      int        *current_len,
+                                      const char *append)
 {
   char *escaped;
   int len;
@@ -477,16 +477,16 @@ append_to_string_escaped (char      **append_to,
       if (*p == '\\' || *p == '"' || *p == ' ')
         {
           buf[0] = '\\';
-          append_to_string (&escaped, &len, buf);
+          sn_internal_append_to_string (&escaped, &len, buf);
         }
       buf[0] = *p;
-      append_to_string (&escaped, &len, buf);
+      sn_internal_append_to_string (&escaped, &len, buf);
       
       ++p;
     }
 
-  append_to_string (append_to, current_len, escaped);
-
+  sn_internal_append_to_string (append_to, current_len, escaped);
+  
   sn_free (escaped);
 }
 
@@ -503,15 +503,15 @@ sn_internal_serialize_message (const char   *prefix,
   len = 0;
   retval = NULL;
 
-  append_to_string (&retval, &len, prefix);
-  append_to_string (&retval, &len, ":  ");
+  sn_internal_append_to_string (&retval, &len, prefix);
+  sn_internal_append_to_string (&retval, &len, ":  ");
 
   i = 0;
   while (property_names[i])
     {
-      append_to_string (&retval, &len, property_names[i]);
-      append_to_string (&retval, &len, "=");
-      append_to_string_escaped (&retval, &len, property_values[i]);
+      sn_internal_append_to_string (&retval, &len, property_names[i]);
+      sn_internal_append_to_string (&retval, &len, "=");
+      sn_internal_append_to_string_escaped (&retval, &len, property_values[i]);
       
       ++i;
     }

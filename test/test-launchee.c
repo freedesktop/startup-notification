@@ -33,7 +33,6 @@ main (int argc, char **argv)
   Display *xdisplay;
   SnDisplay *display;
   SnLauncheeContext *context;
-  int i;
   
   xdisplay = XOpenDisplay (NULL);
   if (xdisplay == NULL)
@@ -51,7 +50,8 @@ main (int argc, char **argv)
                             error_trap_push,
                             error_trap_pop);
 
-  context = sn_launchee_context_new_from_environment (display);
+  context = sn_launchee_context_new_from_environment (display,
+                                                      DefaultScreen (xdisplay));
 
   if (context == NULL)
     {
@@ -59,18 +59,11 @@ main (int argc, char **argv)
       exit (1);
     }
 
-  printf ("Launchee started with window 0x%lx ID \"%s\"\n",
-          sn_launchee_context_get_launch_window (context),
-          sn_launchee_context_get_launch_id (context));
+  printf ("Launchee started with window ID \"%s\"\n",
+          sn_launchee_context_get_startup_id (context));
 
   /* simulate startup time */
-  i = 0;
-  while (i < 4)
-    {
-      sleep (1);
-      sn_launchee_context_pulse (context);
-      ++i;
-    }
+  sleep (4);
 
   printf ("Launchee startup complete\n");
   sn_launchee_context_complete (context);

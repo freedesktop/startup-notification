@@ -308,3 +308,21 @@ sn_internal_string_to_ulong (const char* str)
 
   return retval;
 }
+
+
+void
+sn_internal_append_to_string (char      **append_to,
+                              int        *current_len,
+                              const char *append)
+{
+  int len;
+  char *end;
+  
+  len = strlen (append);
+
+  *append_to = sn_realloc (*append_to, *current_len + len + 1);
+  
+  end = *append_to + *current_len;
+  strcpy (end, append);
+  *current_len = *current_len + len;  
+}

@@ -31,19 +31,23 @@ SN_BEGIN_DECLS
 
 typedef void (* SnXmessageFunc) (SnDisplay       *display,
                                  const char      *message_type,
+                                 Window           message_window,
                                  const char      *message,
                                  void            *user_data);
 
 void sn_internal_add_xmessage_func    (SnDisplay      *display,
+                                       int             screen,
                                        const char     *message_type,
                                        SnXmessageFunc  func,
                                        void           *func_data,
                                        SnFreeFunc      free_data_func);
 void sn_internal_remove_xmessage_func (SnDisplay      *display,
+                                       int             screen,
                                        const char     *message_type,
                                        SnXmessageFunc  func,
                                        void           *func_data);
 void sn_internal_broadcast_xmessage   (SnDisplay      *display,
+                                       int             screen,
                                        const char     *message_type,
                                        const char     *message);
 

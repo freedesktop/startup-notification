@@ -49,10 +49,6 @@ SN_BEGIN_DECLS
 #define NULL ((void*) 0)
 #endif
 
-/* --- From sn-launcher.c --- */
-sn_bool_t sn_internal_launcher_process_event (SnDisplay *display,
-                                              XEvent    *xevent);
-
 /* --- From sn-monitor.c --- */
 sn_bool_t sn_internal_monitor_process_event (SnDisplay *display,
                                              XEvent    *xevent);
@@ -66,6 +62,10 @@ char*     sn_internal_strndup       (const char *str,
 void      sn_internal_strfreev      (char      **strings);
 
 unsigned long sn_internal_string_to_ulong (const char* str);
+
+void sn_internal_append_to_string (char      **append_to,
+                                   int        *current_len,
+                                   const char *append);
 
 /* --- From sn-xmessages.c --- */
 sn_bool_t sn_internal_xmessage_process_event (SnDisplay *display,

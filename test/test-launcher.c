@@ -29,30 +29,6 @@
 
 static pid_t child_pid = 0;
 
-static void
-launcher_event_func (SnLauncherEvent *event,
-                     void            *user_data)
-{
-  SnLauncherContext *context;
-
-  context = sn_launcher_event_get_context (event);
-  
-  switch (sn_launcher_event_get_type (event))
-    {
-    case SN_LAUNCHER_EVENT_COMPLETED:
-      printf ("Completed!\n");
-      break;
-    case SN_LAUNCHER_EVENT_CANCELED:
-      printf ("Canceled!\n");
-      kill (child_pid, SIGTERM);
-      sn_launcher_context_complete (context);
-      break;
-    case SN_LAUNCHER_EVENT_PULSE:
-      printf (" pulse.\n");
-      break;
-    }
-}
-
 int
 main (int argc, char **argv)
 {
@@ -82,13 +58,10 @@ main (int argc, char **argv)
                             error_trap_push,
                             error_trap_pop);
 
-  context = sn_launcher_context_new (display,
-                                     launcher_event_func,
-                                     NULL, NULL);  
+  context = sn_launcher_context_new (display, DefaultScreen (xdisplay));
 
-  sn_launcher_context_set_launch_name (context, "Test Launch");
-  sn_launcher_context_set_launch_description (context, "Launching a test program for libsn");
-  sn_launcher_context_set_supports_cancel (context, TRUE);
+  sn_launcher_context_set_name (context, "Test Launch");
+  sn_launcher_context_set_description (context, "Launching a test program for libsn");
   sn_launcher_context_set_binary_name (context, argv[1]);
   
   sn_launcher_context_initiate (context,
@@ -108,8 +81,6 @@ main (int argc, char **argv)
       _exit (1);
       break;
     }
-
-  sn_launcher_context_set_pid (context, child_pid);
   
   while (TRUE)
     {

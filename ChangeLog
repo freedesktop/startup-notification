@@ -1,5 +1,25 @@
 2002-10-20  Havoc Pennington  <hp@pobox.com>
 
+	* libsn/sn-monitor.c: port to new setup, add multihead support
+
+	* libsn/sn-launcher.c: port to new setup, and blow away 
+	all monitoring stuff, just use sn-monitor.h
+
+	* libsn/sn-xmessages.c: make it all multihead-safe
+
+	* libsn/sn-launchee.c: port to new setup and strip the other stuff
+	out
+
+	* doc/startup-notification.txt:
+	s/DESKTOP_LAUNCH_ID/DESKTOP_STARTUP_ID/ for env variable, 
+	add _NET_STARTUP_ID window manager hint.
+
+2002-10-20  Havoc Pennington  <hp@pobox.com>
+
+	* doc/startup-notification.txt: new docs, new proposed spec
+
+2002-10-20  Havoc Pennington  <hp@pobox.com>
+
 	* Massively rename everything from liblf to libsn, and reimport
 	to CVS.
 

@@ -168,9 +168,6 @@ sn_display_process_event (SnDisplay *display,
 
   retval = FALSE;
 
-  if (sn_internal_launcher_process_event (display, xevent))
-    retval = TRUE;
-
   if (sn_internal_monitor_process_event (display, xevent))
     retval = TRUE;
 

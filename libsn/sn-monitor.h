@@ -33,7 +33,7 @@ SN_BEGIN_DECLS
 
 typedef struct SnMonitorContext SnMonitorContext;
 typedef struct SnMonitorEvent   SnMonitorEvent;
-typedef struct SnLaunchSequence SnLaunchSequence;
+typedef struct SnStartupSequence SnStartupSequence;
 
 typedef void (* SnMonitorEventFunc) (SnMonitorEvent *event,
                                      void           *user_data);
@@ -42,55 +42,36 @@ typedef enum
 {
   SN_MONITOR_EVENT_INITIATED,
   SN_MONITOR_EVENT_COMPLETED,
-  SN_MONITOR_EVENT_CANCELED,
-  SN_MONITOR_EVENT_PULSE,
-  SN_MONITOR_EVENT_GEOMETRY_CHANGED,
-  SN_MONITOR_EVENT_PID_CHANGED,
-  /* only allowed with xmessages protocol */
-  SN_MONITOR_EVENT_WORKSPACE_CHANGED
+  SN_MONITOR_EVENT_CHANGED,
+  SN_MONITOR_EVENT_CANCELED /* not used for now */
 } SnMonitorEventType;
 
 SnMonitorContext*  sn_monitor_context_new                  (SnDisplay           *display,
+                                                            int                  screen,
                                                             SnMonitorEventFunc   event_func,
                                                             void                *event_func_data,
                                                             SnFreeFunc           free_data_func);
 void               sn_monitor_context_ref                  (SnMonitorContext *context);
 void               sn_monitor_context_unref                (SnMonitorContext *context);
 
+void               sn_monitor_event_ref                  (SnMonitorEvent *event);
+void               sn_monitor_event_unref                (SnMonitorEvent *event);
+SnMonitorEvent*    sn_monitor_event_copy                 (SnMonitorEvent *event);
+SnMonitorEventType sn_monitor_event_get_type             (SnMonitorEvent *event);
+SnStartupSequence* sn_monitor_event_get_startup_sequence (SnMonitorEvent *event);
+SnMonitorContext*  sn_monitor_event_get_context          (SnMonitorEvent *event);
 
-void               sn_monitor_event_ref                 (SnMonitorEvent *event);
-void               sn_monitor_event_unref               (SnMonitorEvent *event);
-SnMonitorEvent*    sn_monitor_event_copy                (SnMonitorEvent *event);
-SnMonitorEventType sn_monitor_event_get_type            (SnMonitorEvent *event);
-SnLaunchSequence*  sn_monitor_event_get_launch_sequence (SnMonitorEvent *event);
-SnMonitorContext*  sn_monitor_event_get_context         (SnMonitorEvent *event);
-Time               sn_monitor_event_get_time            (SnMonitorEvent *event);
 
-void        sn_launch_sequence_ref                       (SnLaunchSequence *sequence);
-void        sn_launch_sequence_unref                     (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_id                    (SnLaunchSequence *sequence);
-Window      sn_launch_sequence_get_window                (SnLaunchSequence *sequence);
-sn_bool_t   sn_launch_sequence_get_geometry              (SnLaunchSequence *sequence,
-                                                          int              *x,
-                                                          int              *y,
-                                                          int              *width,
-                                                          int              *height);
-Window      sn_launch_sequence_get_geometry_window       (SnLaunchSequence *sequence);
-sn_bool_t   sn_launch_sequence_get_completed             (SnLaunchSequence *sequence);
-sn_bool_t   sn_launch_sequence_get_canceled              (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_name                  (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_description           (SnLaunchSequence *sequence);
-int         sn_launch_sequence_get_workspace             (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_legacy_resource_class (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_legacy_resource_name  (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_legacy_window_title   (SnLaunchSequence *sequence);
-sn_bool_t   sn_launch_sequence_get_supports_cancel       (SnLaunchSequence *sequence);
-int         sn_launch_sequence_get_pid                   (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_binary_name           (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_hostname              (SnLaunchSequence *sequence);
-const char* sn_launch_sequence_get_icon_name             (SnLaunchSequence *sequence);
-
-void        sn_launch_sequence_cancel                    (SnLaunchSequence *sequence);
+void        sn_startup_sequence_ref                       (SnStartupSequence *sequence);
+void        sn_startup_sequence_unref                     (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_id                    (SnStartupSequence *sequence);
+sn_bool_t   sn_startup_sequence_get_completed             (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_name                  (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_description           (SnStartupSequence *sequence);
+int         sn_startup_sequence_get_workspace             (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_wmclass               (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_binary_name           (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_icon_name             (SnStartupSequence *sequence);
 
 SN_END_DECLS
 

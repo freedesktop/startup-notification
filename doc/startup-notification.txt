@@ -262,7 +262,7 @@ To communicate the startup sequence information from a launcher
 process to a launchee process, when possible an environment variable
 should be used:
 
- DESKTOP_LAUNCH_ID
+ DESKTOP_STARTUP_ID
    value of the "ID" field in the "new" message
 
 Mechanisms other than the environment variable may be used as well, as
@@ -271,7 +271,7 @@ the launchee code is in a process started by the launcher code; if
 they are in the same process the environment variable may not be
 relevant.
 
-Desktop entry extensions
+Desktop entry spec extensions
 ===
 
 StartupNotify=BOOLEAN
@@ -284,6 +284,15 @@ StartupWMClass=STRING
 
   If true, it is KNOWN that the application will map at least one
   window with the given string as its WM class or WM name hint.
+
+EWMH spec extensions
+===
+
+_NET_STARTUP_ID, UTF8_STRING
+
+  The ID used for the startup sequence for the window. If set 
+  on a group leader window, applies to all application windows
+  in that group that do not set their own _NET_STARTUP_ID.
 
 
 A. Sample code to send X message

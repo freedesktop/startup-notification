@@ -32,22 +32,9 @@
 SN_BEGIN_DECLS
 
 typedef struct SnLauncherContext SnLauncherContext;
-typedef struct SnLauncherEvent   SnLauncherEvent;
-
-typedef void (* SnLauncherEventFunc) (SnLauncherEvent *event,
-                                      void            *user_data);
-
-typedef enum
-{
-  SN_LAUNCHER_EVENT_CANCELED,
-  SN_LAUNCHER_EVENT_COMPLETED,
-  SN_LAUNCHER_EVENT_PULSE
-} SnLauncherEventType;
 
 SnLauncherContext* sn_launcher_context_new   (SnDisplay           *display,
-                                              SnLauncherEventFunc  event_func,
-                                              void                *event_func_data,
-                                              SnFreeFunc           free_data_func);
+                                              int                  screen);
 void        sn_launcher_context_ref               (SnLauncherContext *context);
 void        sn_launcher_context_unref             (SnLauncherContext *context);
 
@@ -56,47 +43,23 @@ void        sn_launcher_context_initiate          (SnLauncherContext *context,
                                                    const char        *launcher_name,
                                                    const char        *launchee_name,
                                                    Time               timestamp);
-Window      sn_launcher_context_get_launch_window (SnLauncherContext *context);
 const char* sn_launcher_context_get_launch_id     (SnLauncherContext *context);
 sn_bool_t   sn_launcher_context_get_initiated     (SnLauncherContext *context);
-sn_bool_t   sn_launcher_context_get_canceled      (SnLauncherContext *context);
-sn_bool_t   sn_launcher_context_get_completed     (SnLauncherContext *context);
-void        sn_launcher_context_cancel            (SnLauncherContext *context);
-void        sn_launcher_context_complete          (SnLauncherContext *context);
 
 void        sn_launcher_context_setup_child_process (SnLauncherContext *context);
 
-void sn_launcher_context_set_launch_type           (SnLauncherContext *context,
-                                                    SnLaunchType       type);
-void sn_launcher_context_set_geometry_window       (SnLauncherContext *context,
-                                                    Window             xwindow);
-void sn_launcher_context_set_supports_cancel       (SnLauncherContext *context,
-                                                    sn_bool_t          supports_cancel);
-void sn_launcher_context_set_launch_name           (SnLauncherContext *context,
-                                                    const char        *name);
-void sn_launcher_context_set_launch_description    (SnLauncherContext *context,
-                                                    const char        *description);
-void sn_launcher_context_set_launch_workspace      (SnLauncherContext *context,
-                                                    int                workspace);
-void sn_launcher_context_set_legacy_resource_class (SnLauncherContext *context,
-                                                    const char        *klass);
-void sn_launcher_context_set_legacy_resource_name  (SnLauncherContext *context,
-                                                    const char        *name);
-void sn_launcher_context_set_legacy_window_title   (SnLauncherContext *context,
-                                                    const char        *title);
-void sn_launcher_context_set_binary_name           (SnLauncherContext *context,
-                                                    const char        *name);
-void sn_launcher_context_set_pid                   (SnLauncherContext *context,
-                                                    int                pid);
-void sn_launcher_context_set_icon_name             (SnLauncherContext *context,
-                                                    const char        *name);
-
-SnLauncherEvent*    sn_launcher_event_copy        (SnLauncherEvent *event);
-void                sn_launcher_event_ref         (SnLauncherEvent *event);
-void                sn_launcher_event_unref       (SnLauncherEvent *event);
-SnLauncherEventType sn_launcher_event_get_type    (SnLauncherEvent *event);
-SnLauncherContext*  sn_launcher_event_get_context (SnLauncherEvent *event);
-Time                sn_launcher_event_get_time    (SnLauncherEvent *event);
+void sn_launcher_context_set_name        (SnLauncherContext *context,
+                                          const char        *name);
+void sn_launcher_context_set_description (SnLauncherContext *context,
+                                          const char        *description);
+void sn_launcher_context_set_workspace   (SnLauncherContext *context,
+                                          int                workspace);
+void sn_launcher_context_set_wmclass     (SnLauncherContext *context,
+                                          const char        *klass);
+void sn_launcher_context_set_binary_name (SnLauncherContext *context,
+                                          const char        *name);
+void sn_launcher_context_set_icon_name   (SnLauncherContext *context,
+                                          const char        *name);
 
 SN_END_DECLS
 
