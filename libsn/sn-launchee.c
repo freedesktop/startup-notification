@@ -146,7 +146,7 @@ sn_launchee_context_complete (SnLauncheeContext *context)
 
   message = sn_internal_serialize_message ("remove",
                                            (const char**) keys,
-                                           (const char **) vals);
+                                           (const char**) vals);
 
   sn_internal_broadcast_xmessage (context->display,
                                   context->screen,

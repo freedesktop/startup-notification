@@ -484,9 +484,12 @@ sn_internal_append_to_string_escaped (char      **append_to,
       ++p;
     }
 
-  sn_internal_append_to_string (append_to, current_len, escaped);
-  
-  sn_free (escaped);
+  if (escaped != NULL)
+    {
+      sn_internal_append_to_string (append_to, current_len, escaped);
+      
+      sn_free (escaped);
+    }
 }
 
 char*

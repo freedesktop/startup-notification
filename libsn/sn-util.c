@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #ifndef	REALLOC_0_WORKS
 static void*
@@ -317,6 +318,8 @@ sn_internal_append_to_string (char      **append_to,
 {
   int len;
   char *end;
+
+  assert (append != NULL);
   
   len = strlen (append);
 
