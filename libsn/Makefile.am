@@ -28,4 +28,6 @@ libstartup_notification_1_la_SOURCES=		\
 	sn-xutils.c				\
 	sn-xutils.h
 
+libstartup_notification_1_la_LDFLAGS = -no-undefined
+
 libstartup_notification_1_la_LIBADD= $(LIBSN_LIBS)

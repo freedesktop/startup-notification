@@ -1,3 +1,7 @@
+2003-04-20  Havoc Pennington  <hp@pobox.com>
+
+	* use -no-undefined libtool flag on cygwin, from Masahiro Sakai 
+
 2003-01-20  Havoc Pennington  <hp@pobox.com>
 
 	* configure.in: 0.5
