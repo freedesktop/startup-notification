@@ -34,9 +34,9 @@ main (int argc, char **argv)
   Display *xdisplay;
   SnDisplay *display;
 
-  if (argc != 3)
+  if (argc != 4)
     {
-      fprintf (stderr, "Must specify message type and message content as first and second args\n");
+      fprintf (stderr, "Must specify message type, message begin type, and message content as first, second, and third args\n");
       return 1;
     }
   
@@ -58,7 +58,8 @@ main (int argc, char **argv)
   
   sn_internal_broadcast_xmessage (display, DefaultScreen (xdisplay),
                                   argv[1],
-                                  argv[2]);
+                                  argv[2],
+                                  argv[3]);
   
   return 0;
 }

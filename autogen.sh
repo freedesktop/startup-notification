@@ -7,7 +7,7 @@ test -z "$srcdir" && srcdir=.
 ORIGDIR=`pwd`
 cd $srcdir
 
-PROJECT=launchfeedback
+PROJECT=startup-notification
 TEST_TYPE=-f
 FILE=libsn-1.0.pc.in
 

@@ -73,9 +73,9 @@ main (int argc, char **argv)
   Display *xdisplay;
   SnDisplay *display;
 
-  if (argc != 2)
+  if (argc != 3)
     {
-      fprintf (stderr, "argument must be type of events to watch\n");
+      fprintf (stderr, "arguments must be type and begin type of events to watch\n");
       return 1;
     }
   
@@ -101,7 +101,7 @@ main (int argc, char **argv)
                             error_trap_pop);
 
   sn_internal_add_xmessage_func (display, DefaultScreen (xdisplay),
-                                 argv[1],
+                                 argv[1], argv[2],
                                  message_func,
                                  NULL, NULL);
   
