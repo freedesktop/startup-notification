@@ -453,7 +453,7 @@ sn_internal_send_event_all_screens (SnDisplay    *display,
   xdisplay = sn_display_get_x_display (display);
   
   i = 0;
-  while (sn_display_get_x_screen (display, i) != NULL)
+  while (sn_internal_display_get_x_screen (display, i) != NULL)
     {
       XSendEvent (xdisplay,
                   RootWindow (xdisplay, i),

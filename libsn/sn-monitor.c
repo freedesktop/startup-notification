@@ -24,6 +24,7 @@
 #include "sn-monitor.h"
 #include "sn-internals.h"
 #include "sn-xmessages.h"
+#include <sys/time.h>
 
 struct SnMonitorContext
 {
@@ -36,7 +37,7 @@ struct SnMonitorContext
   /* a context doesn't get events for sequences
    * started prior to context creation
    */
-  int creation_serial; 
+  int creation_serial;  
 };
 
 struct SnMonitorEvent
@@ -70,6 +71,8 @@ struct SnStartupSequence
   unsigned int canceled : 1;
   
   int creation_serial;
+
+  struct timeval initiation_time;
 };
 
 static SnList *context_list = NULL;
@@ -318,6 +321,46 @@ sn_startup_sequence_get_icon_name (SnStartupSequence *sequence)
   return sequence->icon_name;
 }
 
+/**
+ * sn_startup_sequence_get_initiated_time:
+ * @sequence: an #SnStartupSequence
+ * @tv_sec: seconds as in struct timeval
+ * @tv_usec: microseconds as struct timeval
+ *
+ * When a startup sequence is first monitored, libstartup-notification
+ * calls gettimeofday() and records the time, this function
+ * returns that recorded time.
+ * 
+ **/
+void
+sn_startup_sequence_get_initiated_time (SnStartupSequence *sequence,
+                                        long              *tv_sec,
+                                        long              *tv_usec)
+{
+  *tv_sec = sequence->initiation_time.tv_sec;
+  *tv_usec = sequence->initiation_time.tv_usec;
+}
+
+/**
+ * sn_startup_sequence_get_last_active_time:
+ * @sequence: an #SnStartupSequence
+ * @tv_sec: seconds as in struct timeval
+ * @tv_usec: microseconds as in struct timeval
+ *
+ * Returns the last time we had evidence the startup was active.
+ * This function should be used to decide whether a sequence
+ * has timed out.
+ * 
+ **/
+void
+sn_startup_sequence_get_last_active_time (SnStartupSequence *sequence,
+                                          long              *tv_sec,
+                                          long              *tv_usec)
+{
+  /* for now the same as get_initiated_time */
+  *tv_sec = sequence->initiation_time.tv_sec;
+  *tv_usec = sequence->initiation_time.tv_usec;
+}
 
 static SnStartupSequence*
 sn_startup_sequence_new (SnDisplay *display)
@@ -336,6 +379,10 @@ sn_startup_sequence_new (SnDisplay *display)
   sn_display_ref (display);
 
   sequence->workspace = -1; /* not set */
+
+  sequence->initiation_time.tv_sec = 0;
+  sequence->initiation_time.tv_usec = 0;
+  gettimeofday (&sequence->initiation_time, NULL);
   
   return sequence;
 }

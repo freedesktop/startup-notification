@@ -85,5 +85,5 @@ AC_OUTPUT([
 Makefile
 libsn/Makefile
 test/Makefile
-libsn-1.0.pc
+libstartup-notification-1.0.pc
 ])

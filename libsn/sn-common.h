@@ -31,17 +31,11 @@
 
 SN_BEGIN_DECLS
 
+#ifndef SN_API_NOT_YET_FROZEN
+#error "libstartup-notification should only be used if you understand that it's subject to frequent change, and is not yet supported as a fixed API/ABI or as part of the platform"
+#endif
+
 typedef struct SnDisplay SnDisplay;
-
-typedef enum
-{
-  SN_LAUNCH_TYPE_OTHER,
-  SN_LAUNCH_TYPE_DOCK_ICON,
-  SN_LAUNCH_TYPE_DESKTOP_ICON,
-  SN_LAUNCH_TYPE_MENU,
-  SN_LAUNCH_TYPE_KEY_SHORTCUT
-
-} SnLaunchType;
 
 typedef void (* SnDisplayErrorTrapPush) (SnDisplay *display,
                                          Display   *xdisplay);
@@ -54,8 +48,6 @@ SnDisplay* sn_display_new             (Display                *xdisplay,
 void       sn_display_ref             (SnDisplay              *display);
 void       sn_display_unref           (SnDisplay              *display);
 Display*   sn_display_get_x_display   (SnDisplay              *display);
-Screen*    sn_display_get_x_screen    (SnDisplay              *display,
-                                       int                     number);
 sn_bool_t  sn_display_process_event   (SnDisplay              *display,
                                        XEvent                 *xevent);
 void       sn_display_error_trap_push (SnDisplay              *display);

@@ -1,5 +1,5 @@
 
-INCLUDES=$(LIBSN_CFLAGS) -I$(top_srcdir)
+INCLUDES=$(LIBSN_CFLAGS) -I$(top_srcdir) -DSN_API_NOT_YET_FROZEN=1
 
 noinst_PROGRAMS=				\
 	test-launcher				\

@@ -9,7 +9,7 @@ cd $srcdir
 
 PROJECT=startup-notification
 TEST_TYPE=-f
-FILE=libsn-1.0.pc.in
+FILE=libstartup-notification-1.0.pc.in
 
 DIE=0
 

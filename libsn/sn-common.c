@@ -125,7 +125,7 @@ sn_display_get_x_display (SnDisplay *display)
 }
 
 /**
- * sn_display_get_x_screen:
+ * sn_internal_display_get_x_screen:
  * @display: an #SnDisplay
  * @number: screen number to get
  * 
@@ -135,8 +135,8 @@ sn_display_get_x_display (SnDisplay *display)
  * Return value: X screen or %NULL
  **/
 Screen*
-sn_display_get_x_screen (SnDisplay *display,
-                         int        number)
+sn_internal_display_get_x_screen (SnDisplay *display,
+                                  int        number)
 {
   if (number < 0 || number >= display->n_screens)
     return NULL;

@@ -1,4 +1,26 @@
+2002-10-25  Havoc Pennington  <hp@pobox.com>
+
+	* libstartup-notification-1.0.pc.in (Cflags): fix -I flag
+
+	* libsn/sn-monitor.c (sn_startup_sequence_get_initiated_time): new
+	function
+	(sn_startup_sequence_get_last_active_time): new function
+
+2002-10-24  Havoc Pennington  <hp@pobox.com>
+
+	* test/Makefile.am (INCLUDES): -DSN_API_NOT_YET_FROZEN=1
+
+	* libsn/sn-common.h: put in the little API-not-frozen warning.
+
+	* libsn/Makefile.am, configure.in, autogen.sh: rename to 
+	"libstartup-notification" instead of "libsn"
+
 2002-10-23  Havoc Pennington  <hp@pobox.com>
+
+	* libsn/sn-common.h (SnLaunchType): remove
+
+	* libsn/sn-common.c (sn_display_get_x_screen): make it 
+	sn_internal_display_get_x_screen
 
 	* Makefile.am: add .pc file to Makefile
 

@@ -1,9 +1,9 @@
 
-INCLUDES=-I$(top_srcdir) $(LIBSN_CFLAGS)
+INCLUDES=-I$(top_srcdir) $(LIBSN_CFLAGS) -DSN_API_NOT_YET_FROZEN=1
 
-libsnincludedir=$(includedir)/libsn-1.0/libsn
+libsnincludedir=$(includedir)/startup-notification-1.0/libsn
 
-lib_LTLIBRARIES=libsn-1.la
+lib_LTLIBRARIES=libstartup-notification-1.la
 
 libsninclude_HEADERS=				\
 	sn.h					\
@@ -13,7 +13,7 @@ libsninclude_HEADERS=				\
 	sn-monitor.h				\
 	sn-util.h
 
-libsn_1_la_SOURCES=				\
+libstartup_notification_1_la_SOURCES=		\
 	sn-common.c				\
 	sn-internals.c				\
 	sn-internals.h				\
@@ -28,4 +28,4 @@ libsn_1_la_SOURCES=				\
 	sn-xutils.c				\
 	sn-xutils.h
 
-libsn_1_la_LIBADD= $(LIBSN_LIBS)
+libstartup_notification_1_la_LIBADD= $(LIBSN_LIBS)

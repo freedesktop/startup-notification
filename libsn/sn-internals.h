@@ -49,6 +49,10 @@ SN_BEGIN_DECLS
 #define NULL ((void*) 0)
 #endif
 
+/* --- From sn-common.c --- */
+Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
+                                                int                     number);
+
 /* --- From sn-monitor.c --- */
 sn_bool_t sn_internal_monitor_process_event (SnDisplay *display,
                                              XEvent    *xevent);

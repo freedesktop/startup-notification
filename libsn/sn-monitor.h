@@ -73,6 +73,13 @@ const char* sn_startup_sequence_get_wmclass               (SnStartupSequence *se
 const char* sn_startup_sequence_get_binary_name           (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_icon_name             (SnStartupSequence *sequence);
 
+void        sn_startup_sequence_get_initiated_time        (SnStartupSequence *sequence,
+                                                           long              *tv_sec,
+                                                           long              *tv_usec);
+void        sn_startup_sequence_get_last_active_time      (SnStartupSequence *sequence,
+                                                           long              *tv_sec,
+                                                           long              *tv_usec);
+
 SN_END_DECLS
 
 #endif /* __SN_MONITOR_H__ */
