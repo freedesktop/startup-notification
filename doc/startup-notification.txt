@@ -199,6 +199,10 @@ All messages must include these keys:
  
           uniquely identifies a startup sequence; should be some globally 
           unique string (for example, hostname+pid+current time).
+          The string should be in the form of <unique>_TIME<timestamp>,
+          where the timestamp is the X server timestamp of the user
+          action that caused the launch. See the TIMESTAMP key
+          for details.
 
 The following keys are required in a "new" message and may be included
 in either a "new" or a "changed" message:
@@ -244,6 +248,9 @@ The following keys may be provided optionally in either a "new" or a
           have any _NET_WM_USER_TIME property set or if it's older.
           See the description of _NET_WM_USER_TIME in the WM spec
           for details.
+          
+          This key is obsoleted by including the timestamp directly
+          in the ID field.
 
   DESCRIPTION   
 
@@ -394,3 +401,11 @@ this code and destroyed just after.
 
            xevent.xclient.message_type = type_atom_begin;
          }
+
+Change history
+===
+
+Changes since 0.1:
+
+- TIMESTAMP field is obsoleted by including the timestamp directly in the ID.
+
