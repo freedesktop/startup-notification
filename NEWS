@@ -1,3 +1,9 @@
+0.6
+===
+
+  - Fix some fairly serious memory leaks (Tommi Leino)
+  - Cygwin build fix (Masahiro Sakai)
+
 0.5
 ===
 
