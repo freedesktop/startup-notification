@@ -31,7 +31,6 @@ SN_BEGIN_DECLS
 
 typedef void (* SnXmessageFunc) (SnDisplay       *display,
                                  const char      *message_type,
-                                 Window           message_window,
                                  const char      *message,
                                  void            *user_data);
 

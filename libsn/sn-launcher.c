@@ -261,6 +261,8 @@ sn_launcher_context_initiate (SnLauncherContext *context,
                                            (const char**) names,
                                            (const char**) values);
 
+  printf ("Sending '%s'\n", message);
+  
   sn_internal_broadcast_xmessage (context->display,
                                   context->screen,
                                   "_NET_STARTUP_INFO",

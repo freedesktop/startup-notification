@@ -32,7 +32,6 @@
 static void
 message_func (SnDisplay       *display,
               const char      *message_type,
-              Window           xwindow,
               const char      *message,
               void            *user_data)
 {

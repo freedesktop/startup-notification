@@ -45,7 +45,6 @@ struct SnMonitorEvent
   SnMonitorEventType type;
   SnMonitorContext *context;
   SnStartupSequence *sequence;
-  Window xwindow; /* where event occurred */
 };
 
 struct SnStartupSequence
@@ -79,7 +78,6 @@ static int next_sequence_serial = 0;
 
 static void xmessage_func (SnDisplay       *display,
                            const char      *message_type,
-                           Window           xwindow,
                            const char      *message,
                            void            *user_data);
 
@@ -223,7 +221,6 @@ sn_monitor_event_copy (SnMonitorEvent *event)
   copy->sequence = event->sequence;
   if (copy->sequence)
     sn_startup_sequence_ref (copy->sequence);
-  copy->xwindow = event->xwindow;
   
   return copy;
 }
@@ -570,7 +567,6 @@ unref_event_foreach (void *value,
 static void
 xmessage_func (SnDisplay  *display,
                const char *message_type,
-               Window      xwindow,
                const char *message,
                void       *user_data)
 {
@@ -626,7 +622,6 @@ xmessage_func (SnDisplay  *display,
           event->type = SN_MONITOR_EVENT_INITIATED;
           event->context = NULL;
           event->sequence = sequence; /* ref from add_sequence goes here */
-          event->xwindow = xwindow;
           
           sn_list_append (events, event);
         }
@@ -696,7 +691,7 @@ xmessage_func (SnDisplay  *display,
           ++i;
         }
       
-      if (changed)
+      if (changed && strcmp (prefix, "new") != 0)
         {
           SnMonitorEvent *event;
           
@@ -707,7 +702,6 @@ xmessage_func (SnDisplay  *display,
           event->context = NULL;
           event->sequence = sequence;
           sn_startup_sequence_ref (sequence);
-          event->xwindow = xwindow;
           
           sn_list_append (events, event);
         }
@@ -723,7 +717,6 @@ xmessage_func (SnDisplay  *display,
       event->context = NULL;
       event->sequence = sequence;
       sn_startup_sequence_ref (sequence);
-      event->xwindow = xwindow;
       
       sn_list_append (events, event);
     }

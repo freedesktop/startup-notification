@@ -58,6 +58,10 @@ To send a string as an X message, a client does the following:
    The window can be destroyed immediately, it is only used 
    for its window ID.
 
+Implementations may impose a maximum length of message they are
+willing to accept. Typically this length will be reasonably low, 
+perhaps 4K of data.
+
 Key-value strings
 ===
 
@@ -199,6 +203,10 @@ in either a "new" or a "changed" message:
           for example, "Control Center" or "Untitled Document";
           this name should be localized.
 
+  SCREEN
+
+          the X screen number the startup sequence is on
+
 The following keys may be provided optionally in either a "new" or a
 "changed" message:
 
@@ -213,10 +221,10 @@ The following keys may be provided optionally in either a "new" or a
 
   DESKTOP 
 
-          the desktop on which the application should appear, 
-          counting from 0, as in _NET_WM_DESKTOP. However, 
-          this value should never override a _NET_WM_DESKTOP
-          property.
+          the desktop on which the application should appear, counting
+          from 0, as in _NET_WM_DESKTOP. However, this value should
+          never override a _NET_WM_DESKTOP property. This desktop is
+          relative to the screen provided by the SCREEN key.
 
   DESCRIPTION   
 

@@ -40,13 +40,21 @@ monitor_event_func (SnMonitorEvent *event,
   switch (sn_monitor_event_get_type (event))
     {
     case SN_MONITOR_EVENT_INITIATED:
-      printf ("Initiated sequence %s\n",
-              sn_startup_sequence_get_id (sequence));
-      /* FALL THRU */
     case SN_MONITOR_EVENT_CHANGED:
       {
         const char *s;
 
+        if (sn_monitor_event_get_type (event) == SN_MONITOR_EVENT_INITIATED)
+          {
+            printf ("Initiated sequence %s\n",
+                    sn_startup_sequence_get_id (sequence));
+          }
+        else
+          {
+            printf ("Changed sequence %s\n",
+                    sn_startup_sequence_get_id (sequence));
+          }
+        
         s = sn_startup_sequence_get_id (sequence);
         printf (" id %s\n", s ? s : "(unset)");
         

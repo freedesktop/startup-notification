@@ -234,10 +234,9 @@ handler_for_atom_foreach (void *value,
 {
   SnXmessageHandler *handler = value;
   HandlerForAtomData *hfad = data;
-
+  
   if (handler->xdisplay == hfad->xdisplay &&
-      handler->type_atom == hfad->atom &&
-      handler->root == hfad->xwindow)
+      handler->type_atom == hfad->atom)
     {
       hfad->found_handler = TRUE;
       return FALSE;
@@ -278,11 +277,9 @@ find_message_foreach (void *value,
 {
   SnXmessage *message = value;
   FindMessageData *fmd = data;
-
-  if (fmd->xevent->xclient.window ==
-      message->xwindow &&
-      fmd->xevent->xclient.message_type ==
-      message->type_atom)
+  
+  if (fmd->xevent->xclient.window == message->xwindow &&
+      fmd->xevent->xclient.message_type == message->type_atom)
     {
       fmd->message = message;
       return FALSE;
@@ -318,7 +315,9 @@ add_event_to_messages (SnDisplay *display,
 
   if (message == NULL)
     {
-      /* Create a new message */
+      if (xevent->xclient.data.b[0] != '\0') /* if no nul byte, not a start */
+        return NULL;
+      
       message = sn_new0 (SnXmessage, 1);
 
       message->type_atom = xevent->xclient.message_type;
@@ -343,11 +342,14 @@ add_event_to_messages (SnDisplay *display,
   
   src = &xevent->xclient.data.b[0];
   src_end = src + 20;
+
+  if (message->message == NULL)
+    ++src; /* skip initial nul byte */
   
   message->message = sn_realloc (message->message,
-                                 message->allocated + 20);
+                                 message->allocated + (src_end - src));
   dest = message->message + message->allocated;
-  message->allocated += 20;
+  message->allocated += (src_end - src);
 
   completed = FALSE;
   
@@ -355,7 +357,7 @@ add_event_to_messages (SnDisplay *display,
   while (src != src_end)
     {
       *dest = *src;
-
+      
       if (*src == '\0')
         {
           completed = TRUE;
@@ -391,7 +393,6 @@ dispatch_message_foreach (void *value,
 
   (* handler->func) (mdd->display,
                      handler->message_type,
-                     mdd->message->xwindow,
                      mdd->message->message,
                      handler->func_data);
   
@@ -414,7 +415,7 @@ sn_internal_xmessage_process_event (SnDisplay *display,
       if (some_handler_handles_event (display, xevent))
         {
           retval = TRUE;
-
+          
           message = add_event_to_messages (display, xevent);
         }
       break;
@@ -504,11 +505,12 @@ sn_internal_serialize_message (const char   *prefix,
   retval = NULL;
 
   sn_internal_append_to_string (&retval, &len, prefix);
-  sn_internal_append_to_string (&retval, &len, ":  ");
+  sn_internal_append_to_string (&retval, &len, ":");
 
   i = 0;
   while (property_names[i])
     {
+      sn_internal_append_to_string (&retval, &len, " ");
       sn_internal_append_to_string (&retval, &len, property_names[i]);
       sn_internal_append_to_string (&retval, &len, "=");
       sn_internal_append_to_string_escaped (&retval, &len, property_values[i]);
@@ -595,7 +597,7 @@ unescape_string_inplace (char  *str,
   quoted = FALSE;
   
   while (*s)
-    {
+    {      
       if (escaped)
         {
           escaped = FALSE;

@@ -1,4 +1,7 @@
-2002-10-20  Havoc Pennington  <hp@pobox.com>
+2002-10-21  Havoc Pennington  <hp@pobox.com>
+
+	* doc/startup-notification.txt: Add "SCREEN" property, and note 
+	that there may be a max message size.
 	
 	* libsn/sn-xmessages.c (sn_internal_unserialize_message): fix the
 	escaping
