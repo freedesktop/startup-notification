@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include <assert.h>
 
 static SnList* context_list = NULL;
@@ -43,6 +44,7 @@ struct SnLauncherContext
   char               *wmclass;
   char               *binary_name;
   char               *icon_name;
+  struct timeval      initiation_time;
   unsigned int        completed : 1;
   unsigned int        canceled : 1;
 };
@@ -262,12 +264,12 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   
   names[i] = NULL;
   values[i] = NULL;
+
+  gettimeofday (&context->initiation_time, NULL);
   
   message = sn_internal_serialize_message ("new",
                                            (const char**) names,
                                            (const char**) values);
-
-  printf ("Sending '%s'\n", message);
   
   sn_internal_broadcast_xmessage (context->display,
                                   context->screen,
@@ -430,5 +432,43 @@ sn_launcher_context_set_extra_property (SnLauncherContext *context,
 {
   WARN_ALREADY_INITIATED (context);
 
+  /* FIXME implement this */
+}
+
+void
+sn_launcher_context_get_initiated_time (SnLauncherContext *context,
+                                        long              *tv_sec,
+                                        long              *tv_usec)
+{
+  if (context->startup_id == NULL)
+    {
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
+               "sn_launcher_context_get_initiated_time");
+      return;
+    }
+
+  if (tv_sec)
+    *tv_sec = context->initiation_time.tv_sec;
+  if (tv_usec)
+    *tv_usec = context->initiation_time.tv_usec;
+}
+
+void
+sn_launcher_context_get_last_active_time (SnLauncherContext *context,
+                                          long              *tv_sec,
+                                          long              *tv_usec)
+{
+  if (context->startup_id == NULL)
+    {
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
+               "sn_launcher_context_get_initiated_time");
+      return;
+    }
+
+  /* for now, maybe forever, the same as initiated time. */
   
+  if (tv_sec)
+    *tv_sec = context->initiation_time.tv_sec;
+  if (tv_usec)
+    *tv_usec = context->initiation_time.tv_usec;
 }

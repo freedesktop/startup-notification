@@ -1,7 +1,14 @@
 2002-11-30  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-launcher.c (sn_launcher_context_complete): new function
+	(sn_launcher_context_initiate): remove debug spew, and record
+	initiation time
+	(sn_launcher_context_get_initiated_time): new function
+	(sn_launcher_context_get_last_active_time): new function
 
+	* libsn/sn-monitor.c (sn_startup_sequence_get_initiated_time):
+	allow NULL return locations
+	
 	* configure.in: bump version to 0.4 (not releasing yet though)
 
 	* libsn/sn-monitor.c (sn_startup_sequence_complete): new function

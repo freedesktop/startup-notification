@@ -44,7 +44,7 @@ void        sn_launcher_context_initiate          (SnLauncherContext *context,
                                                    const char        *launchee_name,
                                                    Time               timestamp);
 void        sn_launcher_context_complete          (SnLauncherContext *context);
-const char* sn_launcher_context_get_launch_id     (SnLauncherContext *context);
+const char* sn_launcher_context_get_startup_id    (SnLauncherContext *context);
 sn_bool_t   sn_launcher_context_get_initiated     (SnLauncherContext *context);
 
 void        sn_launcher_context_setup_child_process (SnLauncherContext *context);
@@ -65,6 +65,15 @@ void sn_launcher_context_set_icon_name   (SnLauncherContext *context,
 void sn_launcher_context_set_extra_property (SnLauncherContext *context,
                                              const char        *name,
                                              const char        *value);
+
+
+void sn_launcher_context_get_initiated_time   (SnLauncherContext *context,
+                                               long              *tv_sec,
+                                               long              *tv_usec);
+void sn_launcher_context_get_last_active_time (SnLauncherContext *context,
+                                               long              *tv_sec,
+                                               long              *tv_usec);
+
 
 SN_END_DECLS
 

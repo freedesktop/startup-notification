@@ -343,8 +343,10 @@ sn_startup_sequence_get_initiated_time (SnStartupSequence *sequence,
                                         long              *tv_sec,
                                         long              *tv_usec)
 {
-  *tv_sec = sequence->initiation_time.tv_sec;
-  *tv_usec = sequence->initiation_time.tv_usec;
+  if (tv_sec)
+    *tv_sec = sequence->initiation_time.tv_sec;
+  if (tv_usec)
+    *tv_usec = sequence->initiation_time.tv_usec;
 }
 
 /**
@@ -364,8 +366,10 @@ sn_startup_sequence_get_last_active_time (SnStartupSequence *sequence,
                                           long              *tv_usec)
 {
   /* for now the same as get_initiated_time */
-  *tv_sec = sequence->initiation_time.tv_sec;
-  *tv_usec = sequence->initiation_time.tv_usec;
+  if (tv_sec)
+    *tv_sec = sequence->initiation_time.tv_sec;
+  if (tv_usec)
+    *tv_usec = sequence->initiation_time.tv_usec;
 }
 
 void
