@@ -1,3 +1,9 @@
+0.8
+===
+
+ - Support new focus stealing prevention stuff (Elijah Newren)
+ - Use automake 1.7
+
 0.7
 ===
 

@@ -1,5 +1,9 @@
 2004-11-10  Mark McLoughlin  <mark@skynet.ie>
 
+	* configure.in: Version 0.8
+	
+2004-11-10  Mark McLoughlin  <mark@skynet.ie>
+
 	* autogen.sh: use and require automake 1.7.
 	
 	* configure.in: modernise a bit.
