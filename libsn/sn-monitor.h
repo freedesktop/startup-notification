@@ -69,6 +69,7 @@ sn_bool_t   sn_startup_sequence_get_completed             (SnStartupSequence *se
 const char* sn_startup_sequence_get_name                  (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_description           (SnStartupSequence *sequence);
 int         sn_startup_sequence_get_workspace             (SnStartupSequence *sequence);
+Time        sn_startup_sequence_get_timestamp             (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_wmclass               (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_binary_name           (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_icon_name             (SnStartupSequence *sequence);

@@ -63,6 +63,7 @@ struct SnStartupSequence
   char *wmclass;
 
   int workspace;
+  Time timestamp;
 
   char *binary_name;
   char *icon_name;  
@@ -303,6 +304,12 @@ sn_startup_sequence_get_workspace (SnStartupSequence *sequence)
   return sequence->workspace;
 }
 
+Time
+sn_startup_sequence_get_timestamp (SnStartupSequence *sequence)
+{
+  return sequence->timestamp;
+}
+
 const char*
 sn_startup_sequence_get_wmclass (SnStartupSequence *sequence)
 {
@@ -422,6 +429,7 @@ sn_startup_sequence_new (SnDisplay *display)
 
   sequence->screen = -1; /* not set */
   sequence->workspace = -1; /* not set */
+  sequence->timestamp = 0;
 
   sequence->initiation_time.tv_sec = 0;
   sequence->initiation_time.tv_usec = 0;
@@ -781,6 +789,15 @@ xmessage_func (SnDisplay  *display,
               workspace = sn_internal_string_to_ulong (values[i]);
 
               sequence->workspace = workspace;
+              changed = TRUE;
+            }
+          else if (strcmp (names[i], "TIMESTAMP") == 0)
+            {
+              Time timestamp;
+              
+              timestamp = sn_internal_string_to_ulong (values[i]);
+
+              sequence->timestamp = timestamp;
               changed = TRUE;
             }
           else if (strcmp (names[i], "WMCLASS") == 0)

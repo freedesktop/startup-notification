@@ -24,10 +24,66 @@
 
 #include <config.h>
 #include <libsn/sn.h>
+#include <assert.h>
 
 #include "test-boilerplate.h"
 
 static pid_t child_pid = 0;
+
+/* This is a poor way to obtain a timestamp normally (one should be available
+ * to the app from the user clicking on a button or something), but such a
+ * method is not available for this simple test application.
+ */
+Time
+slowly_obtain_timestamp (SnDisplay *display)
+{
+  Window xwindow;
+  Display *xdisplay;
+  XEvent event;
+
+  xdisplay = sn_display_get_x_display (display);
+
+  {
+    XSetWindowAttributes attrs;
+    Atom atom_name;
+    Atom atom_type;
+    char* name;
+
+    attrs.override_redirect = True;
+    attrs.event_mask = PropertyChangeMask | StructureNotifyMask;
+
+    xwindow =
+      XCreateWindow (xdisplay,
+                     RootWindow (xdisplay, 0),
+                     -100, -100, 1, 1,
+                     0,
+                     CopyFromParent,
+                     CopyFromParent,
+                     CopyFromParent,
+                     CWOverrideRedirect | CWEventMask,
+                     &attrs);
+
+    atom_name = XInternAtom (xdisplay, "WM_NAME", TRUE);
+    assert (atom_name != None);
+    atom_type = XInternAtom (xdisplay, "STRING", TRUE);
+    assert (atom_type != None);
+
+    name = "Fake Window";
+    XChangeProperty (xdisplay, 
+                     xwindow, atom_name,
+                     atom_type,
+                     8, PropModeReplace, name, strlen (name));
+  }
+  
+  XWindowEvent (xdisplay,
+                xwindow,
+                PropertyChangeMask,
+                &event);
+
+  XDestroyWindow (xdisplay, xwindow);
+
+  return event.xproperty.time;
+}
 
 int
 main (int argc, char **argv)
@@ -35,6 +91,7 @@ main (int argc, char **argv)
   Display *xdisplay;
   SnDisplay *display;
   SnLauncherContext *context;
+  Time timestamp;
 
   if (argc < 2)
     {
@@ -63,11 +120,12 @@ main (int argc, char **argv)
   sn_launcher_context_set_name (context, "Test Launch");
   sn_launcher_context_set_description (context, "Launching a test program for libsn");
   sn_launcher_context_set_binary_name (context, argv[1]);
-  
+
+  timestamp = slowly_obtain_timestamp (display);
   sn_launcher_context_initiate (context,
                                 "test-launcher",
                                 argv[1],
-                                CurrentTime); /* CurrentTime bad */
+                                timestamp);
 
   switch ((child_pid = fork ()))
     {

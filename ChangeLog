@@ -1,3 +1,28 @@
+2004-06-17  Elijah Newren  <newren@math.utah.edu>
+
+	Make a timestamp be part of the startup sequence (and not just
+	part of the startup_id for the startup sequence).
+
+	* libsn/sn-launcher.c: Add timestamp field to the
+	SnLauncherContext struct,
+	(sn_launcher_context_new): initialize timestamp to 0,
+	(sn_launcher_context_initiate): Make timestamp part of the startup
+	sequence message,
+
+	* libsn/sn-monitor.c: Add timestamp field to the SnStartupSequence
+	struct,
+	(sn_startup_sequence_get_timestamp): new function,
+	(sn_startup_sequence_new): set timestamp from startup sequence
+	message, if found,
+	
+	* libsn/sn-monitor.h:
+	(sn_startup_sequence_get_timestamp): new function,
+
+	* test/test-launcher.c:
+	(slowly_obtain_timestamp): new function
+	(main): Make the test-launcher example provide a valid timestamp,
+	obtained from new slowly_obtain_timestamp function
+
 2004-04-01  Mark McLoughlin  <mark@skynet.ie>
 
 	* configure.in: post-release bump to 0.7.
