@@ -582,119 +582,17 @@ parse_prefix_up_to (const char *str,
  */
 
 static sn_bool_t
-unquote_string_inplace (char  *str,
-                        char **end)
-{
-  char* dest;
-  char* s;
-  char quote_char;
-  
-  dest = s = str;
-
-  quote_char = *s;
-  
-  if (!(*s == '"' || *s == '\''))
-    {
-      /* doesn't begin with quotation mark */
-      *end = str;
-      return FALSE;
-    }
-
-  /* Skip the initial quote mark */
-  ++s;
-
-  if (quote_char == '"')
-    {
-      while (*s)
-        {
-          /* g_assert(s > dest); */ /* loop invariant */
-      
-          switch (*s)
-            {
-            case '"':
-              /* End of the string, return now */
-              *dest = '\0';
-              ++s;
-              *end = s;
-              return TRUE;
-              break;
-
-            case '\\':
-              /* Possible escaped quote or \ */
-              ++s;
-              switch (*s)
-                {
-                case '"':
-                case '\\':
-                case '`':
-                case '$':
-                case '\n':
-                  *dest = *s;
-                  ++s;
-                  ++dest;
-                  break;
-
-                default:
-                  /* not an escaped char */
-                  *dest = '\\';
-                  ++dest;
-                  /* ++s already done. */
-                  break;
-                }
-              break;
-
-            default:
-              *dest = *s;
-              ++dest;
-              ++s;
-              break;
-            }
-
-          /* g_assert(s > dest);*/ /* loop invariant */
-        }
-    }
-  else
-    {
-      while (*s)
-        {
-          /* g_assert(s > dest); */ /* loop invariant */
-          
-          if (*s == '\'')
-            {
-              /* End of the string, return now */
-              *dest = '\0';
-              ++s;
-              *end = s;
-              return TRUE;
-            }
-          else
-            {
-              *dest = *s;
-              ++dest;
-              ++s;
-            }
-
-          /* g_assert(s > dest); */ /* loop invariant */
-        }
-    }
-  
-  /* If we reach here this means the close quote was never encountered */
-
-  *dest = '\0';
-  *end = s;
-  return FALSE;
-}
-
-static sn_bool_t
 unescape_string_inplace (char  *str,
                          char **end)
 {
   char* dest;
   char* s;
   sn_bool_t escaped;
+  sn_bool_t quoted;  
   
   dest = s = str;
   escaped = FALSE;
+  quoted = FALSE;
   
   while (*s)
     {
@@ -705,12 +603,26 @@ unescape_string_inplace (char  *str,
           *dest = *s;
           ++dest;
         }
+      else if (quoted)
+        {
+          if (*s == '"')
+            quoted = FALSE;
+          else if (*s == '\\')
+            escaped = TRUE;
+          else
+            {
+              *dest = *s;
+              ++dest;
+            }
+        }
       else
         {
           if (*s == ' ')
             break;
           else if (*s == '\\')
             escaped = TRUE;
+          else if (*s == '"')
+            quoted = TRUE;
           else
             {
               *dest = *s;
@@ -757,45 +669,28 @@ parse_property (const char  *str,
   while (*p == ' ')
     ++p;
 
-  if (*p == '\'' ||
-      *p == '"')
-    {
-      char *end;
+  {
+    char *end;
+    
+    end = NULL;
+    if (!unescape_string_inplace (p, &end))
+      {
+        sn_free (copy);
+        return FALSE;
+      }
 
-      end = NULL;
-      if (!unquote_string_inplace (p, &end))
-        {
-          sn_free (copy);
-          return FALSE;
-        }
-
-      val = sn_internal_strndup (p, end - p);
-
-      p = end;
-    }
-  else
-    {
-      char *end;
-
-      end = NULL;
-      if (!unescape_string_inplace (p, &end))
-        {
-          sn_free (copy);
-          return FALSE;
-        }
-
-      val = sn_internal_strndup (p, end - p);
-
-      p = end;
-    }
+    val = sn_internal_strndup (p, end - p);
+    
+    p = end;
+  }
 
   while (*p == ' ')
     ++p;
-
+  
   *end_p = str + (p - copy);
-
+  
   sn_free (copy);
-
+  
   *name_p = name;
   *val_p = val;
 

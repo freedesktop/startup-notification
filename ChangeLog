@@ -1,4 +1,9 @@
 2002-10-20  Havoc Pennington  <hp@pobox.com>
+	
+	* libsn/sn-xmessages.c (sn_internal_unserialize_message): fix the
+	escaping
+
+2002-10-20  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-monitor.c: port to new setup, add multihead support
 
