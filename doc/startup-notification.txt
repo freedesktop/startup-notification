@@ -234,6 +234,17 @@ The following keys may be provided optionally in either a "new" or a
           This desktop is relative to the screen provided by 
           the SCREEN key.
 
+  TIMESTAMP
+
+          X server timestamp of the user action that caused this
+          launch. For example window manager that doesn't allow
+          stealing of focus by newly mapped windows while the user
+          works in an application can use this timestamp for windows
+          that have matching _NET_STARTUP_ID property if they don't
+          have any _NET_WM_USER_TIME property set or if it's older.
+          See the description of _NET_WM_USER_TIME in the WM spec
+          for details.
+
   DESCRIPTION   
 
           a short description suitable for display in a dialog that
