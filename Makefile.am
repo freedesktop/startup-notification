@@ -1,5 +1,5 @@
 
-SUBDIRS=libsn test
+SUBDIRS=libsn test doc
 
 EXTRA_DIST=libstartup-notification-1.0.pc.in
 

@@ -1,3 +1,8 @@
+2002-12-02  Havoc Pennington  <hp@redhat.com>
+
+	* doc/Makefile.am (EXTRA_DIST): dist the startup-notification.txt
+	file
+
 2002-11-30  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-launcher.c (sn_launcher_context_complete): new function
