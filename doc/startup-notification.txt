@@ -1,0 +1,335 @@
+Startup notification protocol
+===
+
+This document specifies a mechanism allowing a desktop environment to
+track application startup, to provide user feedback and other
+features. 
+
+Version: 0.1
+Revised: October 20, 2002
+Authors: Lubos Lunak, Havoc Pennington
+
+Terms
+===
+
+Launch:   a "startup event" such as opening a new window, opening a new
+          application, or adding a panel applet. Note that the 
+          launch may or may not involve creating a new UNIX process.
+Launcher: code which starts up a launch
+Launchee: code which is started up by the launcher
+
+X Messages
+===
+
+"X messages" are a mechanism for sending text strings between X
+clients.
+
+To send a string as an X message, a client does the following:
+
+ - Creates an X window to be used to identify the message 
+   uniquely. This window need not be mapped, and may be 
+   a child of any window.
+
+ - Interns an atom type_atom indicating the type of message.
+
+ - Decides on a target_xwindow; this is the root window 
+   for "broadcast" messages, or a specific client's window.
+
+ - Send a series of client messages to the target X window, where each
+   client message contains a portion of the string. The client
+   messages should have the message_type field set to the type of
+   message, the window field set to the X window identifying the
+   message, and the format field set to 8.
+
+   The first byte in the first client message must be nul, and the
+   last byte used in the last client message must also be nul. No
+   intermediate bytes may be nul. The nul bytes identify the beginning
+   and end of the message.
+
+   Client messages must be sent to the chosen target_xwindow, with the
+   event mask PropertyChangeMask. 
+
+   (FIXME this is a bad choice of mask, as we get a bunch of annoying
+   PropertyNotify events; but which mask would be better?)
+
+   Attachment "A" contains example code.
+
+ - Destroys the unique X window used to identify the message. 
+   The window can be destroyed immediately, it is only used 
+   for its window ID.
+
+Key-value strings
+===
+
+The specific strings sent during startup notification encode a message
+type, followed by a list of key-value pairs. Here is an example:
+
+  new: NAME="Hello World" PID=252
+
+A string listing key-value pairs works as follows:
+
+ - the entire string must be valid UTF-8. Invalid strings should be
+   discarded as corrupt, as accepting bad data leads to
+   interoperability problems. (Learn from web browsers.)
+
+   Although the string is UTF-8, parsing is specified in terms of
+   bytes not characters in the below specification.
+
+ - all bytes up to the first ':' byte indicate the type of the
+   message. If the message contains no ':' byte it should be discarded
+   as corrupt.
+
+ - To find the start of a key, the ':' byte delimiting the message
+   type must be skipped. Any space (' ') bytes following it must also
+   be skipped. (Other kinds of whitespace must not be skipped.)  The
+   first non-' ' byte after the ':' byte is the start of the first
+   key.
+
+ - All bytes until the next '=' byte form the name of the 
+   key. The '=' byte should be discarded, as it delimits the 
+   key from the value.
+
+ - Parsing of the value begins with the byte immediately following the
+   '=' byte, even if that byte is a space.  The value is parsed
+   as follows.
+
+   There are two dimensions, "escaped" and "quoted", creating 4
+   states:
+
+     - escaped = TRUE quoted = TRUE
+         . the current byte is appended literally, and the escaped
+           flag is set to FALSE
+
+     - escaped = TRUE quoted = FALSE
+         . the current byte is appended literally, and the escaped
+           flag is set to FALSE
+
+     - escaped = FALSE quoted = FALSE
+         . if the current byte is a double quote '"' it is 
+           discarded, and the quoted flag is set to TRUE
+         . if the current byte is a backslash '\', it is 
+           discarded, and the escaped flag is set to TRUE
+         . if the current byte is a space ' ' byte or nul byte,
+           the end of the value has been reached
+         . any other byte, INCLUDING tabs, newlines, etc., must be
+           appended literally.
+
+     - escaped = FALSE quoted = TRUE:
+         . if the current byte is a double quote '"'
+           it is discarded, and the quoted flag is 
+           set to FALSE
+         . if the current byte is a backslash '\'
+           it is discarded, and the escaped flag 
+           is set to TRUE
+         . otherwise the current byte is appended literally
+
+   If a nul byte is seen in a state other than escaped = FALSE 
+   quoted = FALSE, it is an error, and the message should be discarded
+   as corrupt.
+
+   Note that the escaping here is simpler than either C string literal
+   escaping, or shell quoting. Unlike C string literals, "\n" means
+   "the letter n," not "newline"; unlike quoted shell strings, "\e"
+   means "the letter e," not "backslash followed by the letter e."
+
+   Note that an empty string can be represented by simply not
+   including a value before the first whitespace, as in FOO:
+      FOO= NAME=Hello
+   or by empty quotes as in BAR:
+      BAR="" NAME=Hello
+
+ - Once the end of the value has been reached, any space (' ') bytes
+   should be skipped. The first non-' ' byte is the first byte of the
+   next key.
+
+Note that keys are case-sensitive, Foo and FOO are different keys.
+
+
+Startup notification
+===
+
+The startup notification protocol involves sending X messages with the
+message_type atom _NET_STARTUP_INFO to the root window.  In multihead
+setups, the messages should go to the root window of the X screen
+where the launchee application is being launched.
+
+As a general convention, any key-value pairs in startup notification
+messages that aren't understood by a given client should be ignored by
+that client. Also, any keys or message types not documented here must
+be prefixed by the two bytes "X-" as in "X-myproperty" or
+"X-mymessage".
+
+All messages in the startup notification protocol refer to a "startup
+sequence"; a "startup sequence" reflects a single launch event.
+
+Here are the message types ("message types" here means the type at the
+beginning of the message string, not the type of the X message):
+ 
+  new:    message indicating that a new startup sequence has been
+          initiated. The key-value pairs in this message indicate the
+          properties of the startup sequence.
+
+  change: message updating an existing startup sequence. May only be
+          sent if preceded by a "new" message.  If a client has not
+          seen a "new" message for the same sequence, then all
+          "change" messages should be ignored. i.e. a "change" 
+          message should not be taken as a "new:" message.
+
+          "change" messages contain a subset of the keys allowed
+          in a "new" message. Not all attributes of the startup 
+          sequence are allowed to change over time.
+
+  remove: message ending a startup sequence. Once this message
+          has been seen for a given sequence, any further 
+          messages referring to the sequence should be ignored.
+          
+All messages must include these keys:
+
+  ID
+ 
+          uniquely identifies a startup sequence; should be some globally 
+          unique string
+
+The following keys are required in a "new" message and may be included
+in either a "new" or a "changed" message:
+
+  NAME    
+
+          some human-readable name of the item being started; 
+          for example, "Control Center" or "Untitled Document";
+          this name should be localized.
+
+The following keys may be provided optionally in either a "new" or a
+"changed" message:
+
+  BIN     
+         
+          name of the executable being started, argv[0]
+          
+  ICON    
+  
+          a string to be interpreted exactly as the "Icon" field 
+          in desktop entries is interpreted.
+
+  DESKTOP 
+
+          the desktop on which the application should appear, 
+          counting from 0, as in _NET_WM_DESKTOP. However, 
+          this value should never override a _NET_WM_DESKTOP
+          property.
+
+  DESCRIPTION   
+
+          a short description suitable for display in a dialog that
+          indicates what's happening. For example "Opening document
+          Foo" or "Launching KWord" - the description should be in
+          "foo-ing whatever" format, describing the current status.
+
+  WMCLASS
+
+          a string to match against the "resource name" or "resource
+          class" hints. If this key is present, the launchee will most
+          likely not send a "remove" message on its own. If the
+          desktop environment detects a toplevel window mapped with
+          this name or class, it should send a "remove" message for 
+          the startup sequence. Note that the class hint is in
+          Latin-1, so the value of this key must be converted to 
+          Latin-1 before strcmp'ing it with the window class/name. 
+          (Though in all known cases only ASCII is involved so it 
+          doesn't matter.)
+
+
+Some details of the startup sequence:
+
+ - "new" and "change" messages are sent by the launcher code
+
+ - the launchee code is responsible for sending a "remove" 
+   message to end the launch sequence, unless the WMCLASS 
+   key was set.
+
+ - the "new" message must be the first message. Other message 
+   types should be ignored by all clients unless those clients
+   have seen a "new" message with the same ID.
+
+ - "change" messages can be sent at any time between "new" and
+   "remove"
+
+  
+Communicating from a launcher process to a launchee process
+===
+
+To communicate the startup sequence information from a launcher
+process to a launchee process, when possible an environment variable
+should be used:
+
+ DESKTOP_LAUNCH_ID
+   value of the "ID" field in the "new" message
+
+Mechanisms other than the environment variable may be used as well, as
+long as they are reliable. The environment variable is only used when
+the launchee code is in a process started by the launcher code; if
+they are in the same process the environment variable may not be
+relevant.
+
+Desktop entry extensions
+===
+
+StartupNotify=BOOLEAN
+
+  If true, it is KNOWN that the application will send a "remove"
+  message when started with the DESKTOP_LAUNCH_ID environment variable
+  set.
+
+StartupWMClass=STRING
+
+  If true, it is KNOWN that the application will map at least one
+  window with the given string as its WM class or WM name hint.
+
+
+A. Sample code to send X message
+===
+
+This code omits creation/destruction of "xwindow" which is the unique
+identifier window for the message. It should be created just before
+this code and destroyed just after.
+   
+       XEvent xevent;
+       const char *src;
+       const char *src_end;
+       char *dest;
+       char *dest_end;
+
+       xevent.xclient.type = ClientMessage;
+       xevent.xclient.message_type = type_atom;
+       xevent.xclient.display = xdisplay;
+       xevent.xclient.window = xwindow;
+       xevent.xclient.format = 8;
+
+       src = message;
+       src_end = message + strlen (message) + 1; /* +1 to include nul byte */
+
+       while (src != src_end)
+         {
+           dest = &xevent.xclient.data.b[0];
+           dest_end = dest + 20;
+
+           if (src == message)
+             {
+               *dest = '\0';
+               ++dest;
+             }
+
+           while (dest != dest_end &&
+                  src != src_end)
+             {
+               *dest = *src;
+               ++dest;
+               ++src;
+             }
+
+           XSendEvent (xdisplay,
+                       target_xwindow,
+                       False,
+                       PropertyChangeMask,
+                       xevent);
+         }

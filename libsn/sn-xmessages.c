@@ -185,6 +185,13 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
         dest = &xevent.xclient.data.b[0];
         dest_end = dest + 20;
         
+        if (src == message)
+          {
+            /* first byte is nul */
+            *dest = '\0';
+            ++dest;
+          }
+        
         while (dest != dest_end &&
                src != src_end)
           {
@@ -192,9 +199,12 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
             ++dest;
             ++src;
           }
-
-        sn_internal_send_event_all_screens (display, PropertyChangeMask,
-                                            &xevent);
+        
+        XSendEvent (xdisplay,
+                    target_xwindow,
+                    False,
+                    PropertyChangeMask,
+                    &xevent);
       }
   }
 
