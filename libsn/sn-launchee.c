@@ -103,6 +103,7 @@ sn_launchee_context_unref (SnLauncheeContext *context)
   context->refcount -= 1;
   if (context->refcount == 0)
     {
+      sn_display_unref (context->display);
       sn_free (context->startup_id);
       
       sn_free (context);

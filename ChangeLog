@@ -1,3 +1,10 @@
+2005-03-07  Mark McLoughlin  <mark@skynet.ie>
+
+	Based on fix from Aivars Kalvans <aivars.kalvans@inbox.lv>
+
+	* libsn/sn-launchee.c: (sn_launchee_context_unref):
+	Unref the SnDisplay.
+
 2005-02-26  Vincent Untz  <vincent@vuntz.net>
 
 	* libsn/sn-xmessages.c: (parse_property): plug leak
