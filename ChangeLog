@@ -1,5 +1,9 @@
 2004-06-24  Mark McLoughlin  <mark@skynet.ie>
 
+	* configure.in: post-release bump to 0.8.
+
+2004-06-24  Mark McLoughlin  <mark@skynet.ie>
+
 	* configure.in: Version 0.7.
 
 2004-06-17  Elijah Newren  <newren@math.utah.edu>

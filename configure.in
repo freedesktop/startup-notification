@@ -2,7 +2,7 @@ AC_INIT(libsn/sn-launchee.c)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(startup-notification, 0.7)
+AM_INIT_AUTOMAKE(startup-notification, 0.8)
 
 # Honor aclocal flags
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
