@@ -1,18 +1,18 @@
-AC_INIT(libsn/sn-launchee.c)
+AC_INIT([startup-notification], [0.8],
+        [http://www.freedesktop.org/Software/startup-notification])
+AC_CONFIG_SRCDIR(libsn/sn-launchee.c)
 
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(startup-notification, 0.8)
-
 # Honor aclocal flags
-ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
+AC_SUBST(ACLOCAL_AMFLAGS, "\${ACLOCAL_FLAGS}")
 
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
 AC_ISC_POSIX
 AC_HEADER_STDC
-AC_ARG_PROGRAM
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 
@@ -53,7 +53,8 @@ if test "x$GCC" = "xyes"; then
     my_free_p = 0;
     my_realloc_p = 0;
   ],
-    AC_DEFINE(SANE_MALLOC_PROTOS)
+    AC_DEFINE(SANE_MALLOC_PROTOS, 1,
+              [Define if you have correct malloc prototypes])
     SANE_MALLOC_PROTOS=yes)
 fi
 AC_MSG_RESULT($SANE_MALLOC_PROTOS)
@@ -82,10 +83,12 @@ LIBSN_LIBS=" $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
 AC_SUBST(LIBSN_CFLAGS)
 AC_SUBST(LIBSN_LIBS)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 libsn/Makefile
 test/Makefile
 doc/Makefile
 libstartup-notification-1.0.pc
 ])
+
+AC_OUTPUT

@@ -21,8 +21,8 @@ DIE=0
 	DIE=1
 }
 
-AUTOMAKE=automake-1.4
-ACLOCAL=aclocal-1.4
+AUTOMAKE=automake-1.7
+ACLOCAL=aclocal-1.7
 
 ($AUTOMAKE --version) < /dev/null > /dev/null 2>&1 || {
         AUTOMAKE=automake
@@ -32,7 +32,7 @@ ACLOCAL=aclocal-1.4
 ($AUTOMAKE --version) < /dev/null > /dev/null 2>&1 || {
 	echo
 	echo "You must have automake installed to compile $PROJECT."
-	echo "Get ftp://ftp.cygnus.com/pub/home/tromey/automake-1.2d.tar.gz"
+	echo "Get http://ftp.gnu.org/pub/gnu/automake/automake-1.7.9.tar.gz"
 	echo "(or a newer version if it is available)"
 	DIE=1
 }
@@ -59,7 +59,7 @@ $ACLOCAL $ACLOCAL_FLAGS
 # optionally feature autoheader
 (autoheader --version)  < /dev/null > /dev/null 2>&1 && autoheader
 
-$AUTOMAKE -a $am_opt
+$AUTOMAKE --gnu --add-missing
 autoconf || echo "autoconf failed - version 2.5x is probably required"
 
 cd $ORIGDIR

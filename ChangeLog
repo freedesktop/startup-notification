@@ -1,3 +1,11 @@
+2004-11-10  Mark McLoughlin  <mark@skynet.ie>
+
+	* autogen.sh: use and require automake 1.7.
+	
+	* configure.in: modernise a bit.
+
+	* acconfig.h: remove, not needed anymore.
+
 2004-10-27  Havoc Pennington  <hp@redhat.com>
 
 	* patch from Elijah Newren 
