@@ -1,3 +1,7 @@
+2004-06-24  Mark McLoughlin  <mark@skynet.ie>
+
+	* configure.in: Version 0.7.
+
 2004-06-17  Elijah Newren  <newren@math.utah.edu>
 
 	Make a timestamp be part of the startup sequence (and not just
