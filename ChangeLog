@@ -1,3 +1,19 @@
+2002-11-30  Havoc Pennington  <hp@pobox.com>
+
+	* libsn/sn-launcher.c (sn_launcher_context_complete): new function
+
+	* configure.in: bump version to 0.4 (not releasing yet though)
+
+	* libsn/sn-monitor.c (sn_startup_sequence_complete): new function
+	so the WM or tasklist can time out a sequence.
+	(xmessage_func): add support for SCREEN field, kill the startup
+	sequence immediately if SCREEN isn't provided.
+
+2002-11-01  Havoc Pennington  <hp@pobox.com>
+
+	* libsn/sn-launcher.c (sn_launcher_context_set_extra_property):
+	implement
+
 2002-11-01  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-launcher.c (sn_launcher_context_initiate): fill in

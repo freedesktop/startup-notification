@@ -43,6 +43,7 @@ void        sn_launcher_context_initiate          (SnLauncherContext *context,
                                                    const char        *launcher_name,
                                                    const char        *launchee_name,
                                                    Time               timestamp);
+void        sn_launcher_context_complete          (SnLauncherContext *context);
 const char* sn_launcher_context_get_launch_id     (SnLauncherContext *context);
 sn_bool_t   sn_launcher_context_get_initiated     (SnLauncherContext *context);
 

@@ -278,6 +278,38 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   sn_free (message);
 }
 
+void
+sn_launcher_context_complete (SnLauncherContext *context)
+{
+  char *keys[2];
+  char *vals[2];
+  char *message;
+
+  if (context->startup_id == NULL)
+    {
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
+               "sn_launcher_context_complete");
+      return;
+    }
+  
+  keys[0] = "ID";
+  keys[1] = NULL;
+  vals[0] = context->startup_id;
+  vals[1] = NULL; 
+
+  message = sn_internal_serialize_message ("remove",
+                                           (const char**) keys,
+                                           (const char **) vals);
+
+  sn_internal_broadcast_xmessage (context->display,
+                                  context->screen,
+                                  "_NET_STARTUP_INFO",
+                                  "_NET_STARTUP_INFO_BEGIN",
+                                  message);
+
+  sn_free (message);
+}
+
 const char*
 sn_launcher_context_get_startup_id (SnLauncherContext *context)
 {
@@ -310,7 +342,7 @@ sn_launcher_context_setup_child_process (SnLauncherContext *context)
   if (context->startup_id == NULL)
     {
       fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
-               __FUNCTION__);
+               "sn_launcher_context_setup_child_process");
       return;
     }
 
@@ -398,4 +430,5 @@ sn_launcher_context_set_extra_property (SnLauncherContext *context,
 {
   WARN_ALREADY_INITIATED (context);
 
+  
 }

@@ -72,6 +72,7 @@ int         sn_startup_sequence_get_workspace             (SnStartupSequence *se
 const char* sn_startup_sequence_get_wmclass               (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_binary_name           (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_icon_name             (SnStartupSequence *sequence);
+int         sn_startup_sequence_get_screen                (SnStartupSequence *sequence);
 
 void        sn_startup_sequence_get_initiated_time        (SnStartupSequence *sequence,
                                                            long              *tv_sec,
@@ -79,6 +80,8 @@ void        sn_startup_sequence_get_initiated_time        (SnStartupSequence *se
 void        sn_startup_sequence_get_last_active_time      (SnStartupSequence *sequence,
                                                            long              *tv_sec,
                                                            long              *tv_usec);
+
+void        sn_startup_sequence_complete                  (SnStartupSequence *sequence);
 
 SN_END_DECLS
 

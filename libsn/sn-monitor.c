@@ -321,6 +321,12 @@ sn_startup_sequence_get_icon_name (SnStartupSequence *sequence)
   return sequence->icon_name;
 }
 
+int
+sn_startup_sequence_get_screen (SnStartupSequence *sequence)
+{
+  return sequence->screen;
+}
+
 /**
  * sn_startup_sequence_get_initiated_time:
  * @sequence: an #SnStartupSequence
@@ -362,6 +368,38 @@ sn_startup_sequence_get_last_active_time (SnStartupSequence *sequence,
   *tv_usec = sequence->initiation_time.tv_usec;
 }
 
+void
+sn_startup_sequence_complete (SnStartupSequence *sequence)
+{
+  char *keys[2];
+  char *vals[2];
+  char *message;
+
+  if (sequence->id == NULL)
+    return;
+
+  if (sequence->screen < 0)
+    return;
+  
+  keys[0] = "ID";
+  keys[1] = NULL;
+  vals[0] = sequence->id;
+  vals[1] = NULL; 
+
+  message = sn_internal_serialize_message ("remove",
+                                           (const char**) keys,
+                                           (const char **) vals);
+
+  sn_internal_broadcast_xmessage (sequence->display,
+                                  sequence->screen,
+                                  "_NET_STARTUP_INFO",
+                                  "_NET_STARTUP_INFO_BEGIN",
+                                  message);
+
+  sn_free (message);
+
+}
+
 static SnStartupSequence*
 sn_startup_sequence_new (SnDisplay *display)
 {
@@ -378,6 +416,7 @@ sn_startup_sequence_new (SnDisplay *display)
   sequence->display = display;
   sn_display_ref (display);
 
+  sequence->screen = -1; /* not set */
   sequence->workspace = -1; /* not set */
 
   sequence->initiation_time.tv_sec = 0;
@@ -702,6 +741,19 @@ xmessage_func (SnDisplay  *display,
                   changed = TRUE;
                 }
             }
+          else if (strcmp (names[i], "SCREEN") == 0)
+            {
+              if (sequence->screen < 0)
+                {
+                  int n;
+                  n = atoi (values[i]);
+                  if (n >= 0 && n < ScreenCount (sn_display_get_x_display (sequence->display)))
+                    {
+                      sequence->screen = n;
+                      changed = TRUE;
+                    }
+                }
+            }
           else if (strcmp (names[i], "DESCRIPTION") == 0)
             {
               if (sequence->description == NULL)
@@ -738,8 +790,32 @@ xmessage_func (SnDisplay  *display,
           
           ++i;
         }
-      
-      if (changed && strcmp (prefix, "new") != 0)
+
+      if (strcmp (prefix, "new") == 0)
+        {
+          if (sequence->screen < 0)
+            {
+              SnMonitorEvent *event;
+              
+              event = sn_new (SnMonitorEvent, 1);
+              
+              event->refcount = 1;
+              event->type = SN_MONITOR_EVENT_COMPLETED;
+              event->context = NULL;
+              event->sequence = sequence;
+              sn_startup_sequence_ref (sequence);
+              
+              sn_list_append (events, event);
+
+              fprintf (stderr,
+                       "Ending startup notification for %s (%s) because SCREEN "
+                       "field was not provided; this is a bug in the launcher "
+                       "application\n",
+                       sequence->name ? sequence->name : "???",
+                       sequence->binary_name ? sequence->binary_name : "???");
+            }
+        }
+      else if (changed)
         {
           SnMonitorEvent *event;
           
