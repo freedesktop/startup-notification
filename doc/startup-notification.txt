@@ -180,14 +180,25 @@ beginning of the message string, not the type of the X message):
           startup sequence).
           
 
-  change: message updating an existing startup sequence. If a client
-          has not seen a "new:" message for the same sequence, then
-          all "change:" messages should be ignored. i.e. a "change:" 
-          message should not be taken as a "new:" message.
+  change: message changing a startup sequence. Clients should update
+          information about the matching startup sequence to the newly
+          provides information. "change" messages contain
+          a subset of the keys allowed in a "new" message. Not all
+          attributes of the startup sequence are allowed to change
+          over time.
+          
+          "change:" messages not be taken as a "new:" message,
+          i.e. they should not cause any feedback or similar.
+          
+          If a client has not seen a "new:" message for the same sequence,
+          then it should remember the information for later use in case
+          a "new:" message comes later. "change:" messages without
+          a following "new:" message can be discarded after a reasonable
+          timeout (>= 1 minute). Rationale: The application
+          may want to send certain information like timestamp or description
+          first, before handling control to library code deciding
+          if there should be actually any feedback for the launch. 
 
-          "change" messages contain a subset of the keys allowed
-          in a "new" message. Not all attributes of the startup 
-          sequence are allowed to change over time.
 
   remove: message ending a startup sequence. Once this message
           has been seen for a given sequence, any further 
@@ -408,4 +419,4 @@ Change history
 Changes since 0.1:
 
 - TIMESTAMP field is obsoleted by including the timestamp directly in the ID.
-
+- data from "change:" messages should be used even if they precede the matching "new:" message
