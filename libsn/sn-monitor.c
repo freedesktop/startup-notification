@@ -129,6 +129,7 @@ sn_monitor_context_new (SnDisplay           *display,
     sn_internal_add_xmessage_func (display,
                                    screen,
                                    "_NET_STARTUP_INFO",
+                                   "_NET_STARTUP_INFO_BEGIN",
                                    xmessage_func,
                                    NULL, NULL);
     

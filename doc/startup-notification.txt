@@ -26,25 +26,27 @@ clients.
 
 To send a string as an X message, a client does the following:
 
- - Creates an X window to be used to identify the message 
-   uniquely. This window need not be mapped, and may be 
+ - Creates an X window to be used to identify the message
+   uniquely. This window need not be mapped, and may be
    a child of any window.
 
- - Interns an atom type_atom indicating the type of message.
+ - Interns atoms type_atom and type_atom_begin indicating
+   the type of message.
 
- - Decides on a target_xwindow; this is the root window 
+ - Decides on a target_xwindow; this is the root window
    for "broadcast" messages, or a specific client's window.
 
  - Send a series of client messages to the target X window, where each
    client message contains a portion of the string. The client
-   messages should have the message_type field set to the type of
-   message, the window field set to the X window identifying the
-   message, and the format field set to 8.
+   messages should have the window field set to the X window
+   identifying the message, the format field set to 8, and
+   the message_type field set to the type of message, type_atom_begin
+   for the first client message and type_atom for any following client
+   messages.
 
-   The first byte in the first client message must be nul, and the
-   last byte used in the last client message must also be nul. No
-   intermediate bytes may be nul. The nul bytes identify the beginning
-   and end of the message.
+   The last byte used in the last client message must be nul, and no
+   intermediate bytes may be nul. The nul byte identifies
+   the end of the message.
 
    Client messages must be sent to the chosen target_xwindow, with the
    event mask PropertyChangeMask. 
@@ -153,9 +155,10 @@ Startup notification
 ===
 
 The startup notification protocol involves sending X messages with the
-message_type atom _NET_STARTUP_INFO to the root window.  In multihead
-setups, the messages should go to the root window of the X screen
-where the launchee application is being launched.
+message_type atom _NET_STARTUP_INFO_BEGIN/_NET_STARTUP_INFO to the
+root window.  In multihead setups, the messages should go to the root
+window of the X screen where the launchee application is being
+launched.
 
 As a general convention, any key-value pairs in startup notification
 messages that aren't understood by a given client should be ignored by
@@ -345,7 +348,7 @@ this code and destroyed just after.
        char *dest_end;
 
        xevent.xclient.type = ClientMessage;
-       xevent.xclient.message_type = type_atom;
+       xevent.xclient.message_type = type_atom_begin;
        xevent.xclient.display = xdisplay;
        xevent.xclient.window = xwindow;
        xevent.xclient.format = 8;
@@ -377,4 +380,6 @@ this code and destroyed just after.
                        False,
                        PropertyChangeMask,
                        xevent);
+
+           xevent.xclient.message_type = type_atom_begin;
          }

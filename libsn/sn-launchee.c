@@ -151,6 +151,7 @@ sn_launchee_context_complete (SnLauncheeContext *context)
   sn_internal_broadcast_xmessage (context->display,
                                   context->screen,
                                   "_NET_STARTUP_INFO",
+                                  "_NET_STARTUP_INFO_BEGIN",
                                   message);
 
   sn_free (message);

@@ -37,6 +37,7 @@ typedef void (* SnXmessageFunc) (SnDisplay       *display,
 void sn_internal_add_xmessage_func    (SnDisplay      *display,
                                        int             screen,
                                        const char     *message_type,
+                                       const char     *message_type_begin,
                                        SnXmessageFunc  func,
                                        void           *func_data,
                                        SnFreeFunc      free_data_func);
@@ -48,6 +49,7 @@ void sn_internal_remove_xmessage_func (SnDisplay      *display,
 void sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                        int             screen,
                                        const char     *message_type,
+                                       const char     *message_type_begin,
                                        const char     *message);
 
 char*     sn_internal_serialize_message   (const char   *prefix,

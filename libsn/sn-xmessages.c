@@ -31,6 +31,7 @@ typedef struct
   Display       *xdisplay;
   Window         root;
   Atom           type_atom;
+  Atom           type_atom_begin;
   char          *message_type;
   SnXmessageFunc func;
   void          *func_data;
@@ -39,7 +40,7 @@ typedef struct
 
 typedef struct
 {
-  Atom type_atom;
+  Atom type_atom_begin;
   Window xwindow;
   char *message;
   int allocated;
@@ -52,6 +53,7 @@ void
 sn_internal_add_xmessage_func (SnDisplay      *display,
                                int             screen,
                                const char     *message_type,
+                               const char     *message_type_begin,
                                SnXmessageFunc  func,
                                void           *func_data,
                                SnFreeFunc      free_data_func)
@@ -66,8 +68,9 @@ sn_internal_add_xmessage_func (SnDisplay      *display,
   handler->xdisplay = sn_display_get_x_display (display);
   handler->root = RootWindow (handler->xdisplay, screen);
   handler->type_atom = sn_internal_atom_get (display, message_type);
+  handler->type_atom_begin = sn_internal_atom_get (display, message_type_begin);
   handler->message_type = sn_internal_strdup (message_type);
-  handler->func= func;
+  handler->func = func;
   handler->func_data = func_data;
   handler->free_data_func = free_data_func;
   
@@ -136,9 +139,11 @@ void
 sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                   int             screen,
                                   const char     *message_type,
+                                  const char     *message_type_begin,
                                   const char     *message)
 {
   Atom type_atom;
+  Atom type_atom_begin;
   Window xwindow;
   Display *xdisplay;
 
@@ -171,6 +176,7 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
   }
 
   type_atom = sn_internal_atom_get (display, message_type);
+  type_atom_begin = sn_internal_atom_get (display, message_type_begin);
   
   {
     XEvent xevent;
@@ -180,7 +186,7 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
     char *dest_end;
     
     xevent.xclient.type = ClientMessage;
-    xevent.xclient.message_type = type_atom;
+    xevent.xclient.message_type = type_atom_begin;
     xevent.xclient.display = xdisplay;
     xevent.xclient.window = xwindow;
     xevent.xclient.format = 8;
@@ -191,14 +197,7 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
     while (src != src_end)
       {
         dest = &xevent.xclient.data.b[0];
-        dest_end = dest + 20;
-        
-        if (src == message)
-          {
-            /* first byte is nul */
-            *dest = '\0';
-            ++dest;
-          }
+        dest_end = dest + 20;        
         
         while (dest != dest_end &&
                src != src_end)
@@ -213,6 +212,8 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
                     False,
                     PropertyChangeMask,
                     &xevent);
+
+        xevent.xclient.message_type = type_atom;
       }
   }
 
@@ -236,7 +237,8 @@ handler_for_atom_foreach (void *value,
   HandlerForAtomData *hfad = data;
   
   if (handler->xdisplay == hfad->xdisplay &&
-      handler->type_atom == hfad->atom)
+      (handler->type_atom == hfad->atom ||
+       handler->type_atom_begin == hfad->atom))
     {
       hfad->found_handler = TRUE;
       return FALSE;
@@ -278,8 +280,7 @@ find_message_foreach (void *value,
   SnXmessage *message = value;
   FindMessageData *fmd = data;
   
-  if (fmd->xevent->xclient.window == message->xwindow &&
-      fmd->xevent->xclient.message_type == message->type_atom)
+  if (fmd->xevent->xclient.window == message->xwindow)
     {
       fmd->message = message;
       return FALSE;
@@ -315,12 +316,10 @@ add_event_to_messages (SnDisplay *display,
 
   if (message == NULL)
     {
-      if (xevent->xclient.data.b[0] != '\0') /* if no nul byte, not a start */
-        return NULL;
       
       message = sn_new0 (SnXmessage, 1);
 
-      message->type_atom = xevent->xclient.message_type;
+      message->type_atom_begin = xevent->xclient.message_type;
       message->xwindow = xevent->xclient.window;
       message->message = NULL;
       message->allocated = 0;
@@ -330,7 +329,7 @@ add_event_to_messages (SnDisplay *display,
 
       sn_list_prepend (pending_messages, message);
     }
-
+  
   if (message->allocated > MAX_MESSAGE_LENGTH)
     {
       /* This message is some kind of crap - just dump it. */
@@ -342,9 +341,6 @@ add_event_to_messages (SnDisplay *display,
   
   src = &xevent->xclient.data.b[0];
   src_end = src + 20;
-
-  if (message->message == NULL)
-    ++src; /* skip initial nul byte */
   
   message->message = sn_realloc (message->message,
                                  message->allocated + (src_end - src));
@@ -390,11 +386,13 @@ dispatch_message_foreach (void *value,
 {
   SnXmessageHandler *handler = value;
   MessageDispatchData *mdd = data;  
-
-  (* handler->func) (mdd->display,
-                     handler->message_type,
-                     mdd->message->message,
-                     handler->func_data);
+  
+  if (handler->type_atom_begin == mdd->message->type_atom_begin &&
+      sn_display_get_x_display (mdd->display) == handler->xdisplay)
+    (* handler->func) (mdd->display,
+                       handler->message_type,
+                       mdd->message->message,
+                       handler->func_data);
   
   return TRUE;
 }
