@@ -1,3 +1,7 @@
+2002-10-29  Havoc Pennington  <hp@pobox.com>
+
+	* configure.in: 0.3
+
 2002-10-27  Anders Carlsson  <andersca@gnu.org>
 
 	* test/Makefile.am: Use "libstartup-notification" instead of libsn.
