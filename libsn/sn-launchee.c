@@ -123,6 +123,51 @@ sn_launchee_context_get_startup_id (SnLauncheeContext *context)
   return context->startup_id;
 }
 
+/**
+ * sn_launchee_context_get_id_has_timestamp:
+ * @context: an #SnLauncheeContext
+ * 
+ * Return whether the startup ID for the context contains a timestamp
+ * 
+ * Return value: whether the startup ID has an embedded timestamp
+ **/
+int
+sn_launchee_context_get_id_has_timestamp (SnLauncheeContext *context)
+{
+  char * time_str;
+
+  time_str = sn_internal_find_last_occurrence(context->startup_id, "_TIME");
+
+  return time_str != NULL;
+}
+
+/**
+ * sn_launchee_context_get_timestamp:
+ * @context: an #SnLauncheeContext
+ * 
+ * Return the timestamp embedded in the startup ID
+ * 
+ * Return value: timestamp embedded in the startup ID
+ **/
+Time
+sn_launchee_context_get_timestamp (SnLauncheeContext *context)
+{
+  char * time_str;
+
+  time_str = sn_internal_find_last_occurrence(context->startup_id, "_TIME");
+  if (time_str != NULL)
+    {
+      /* Skip past the "_TIME" part */
+      time_str += 5;
+
+      return sn_internal_string_to_ulong (time_str);
+    }
+
+  fprintf (stderr,
+           "libsn: No timestamp contained in the startup ID!\n");
+  /* Unfortunately, all values are valid; let's just return -1 */
+  return -1;
+}
 
 /**
  * sn_launchee_context_complete:

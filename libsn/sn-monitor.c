@@ -70,6 +70,7 @@ struct SnStartupSequence
 
   unsigned int completed : 1;
   unsigned int canceled : 1;
+  unsigned int timestamp_set : 1;
   
   int creation_serial;
 
@@ -307,7 +308,15 @@ sn_startup_sequence_get_workspace (SnStartupSequence *sequence)
 Time
 sn_startup_sequence_get_timestamp (SnStartupSequence *sequence)
 {
-  return sequence->timestamp;
+  if (!sequence->timestamp_set)
+    {
+      fprintf (stderr,
+               "libsn: Buggy startup-notification launcher!  No timestamp!\n");
+      /* Unfortunately, all values are valid; let's just return -1 */
+      return -1;
+    }
+  else
+    return sequence->timestamp;
 }
 
 const char*
@@ -430,6 +439,7 @@ sn_startup_sequence_new (SnDisplay *display)
   sequence->screen = -1; /* not set */
   sequence->workspace = -1; /* not set */
   sequence->timestamp = 0;
+  sequence->timestamp_set = FALSE;
 
   sequence->initiation_time.tv_sec = 0;
   sequence->initiation_time.tv_usec = 0;
@@ -708,12 +718,26 @@ xmessage_func (SnDisplay  *display,
       if (sequence == NULL)
         {
           SnMonitorEvent *event;
+          char *time_str;
 
           sequence = add_sequence (display);
           if (sequence == NULL)
             goto out;
           
           sequence->id = sn_internal_strdup (launch_id);
+
+          /* Current spec says timestamp is part of the startup id; so we need
+           * to get the timestamp here if the launcher is using the current spec
+           */
+          time_str = sn_internal_find_last_occurrence(sequence->id, "_TIME");
+          if (time_str != NULL)
+            {
+              /* Skip past the "_TIME" part */
+              time_str += 5;
+
+              sequence->timestamp = sn_internal_string_to_ulong (time_str);
+              sequence->timestamp_set = TRUE;
+            }
           
           event = sn_new (SnMonitorEvent, 1);
           
@@ -791,13 +815,20 @@ xmessage_func (SnDisplay  *display,
               sequence->workspace = workspace;
               changed = TRUE;
             }
-          else if (strcmp (names[i], "TIMESTAMP") == 0)
+          else if (strcmp (names[i], "TIMESTAMP") == 0 && 
+                   !sequence->timestamp_set)
             {
+              /* Old version of the spec says that the timestamp was
+               * sent as part of a TIMESTAMP message.  We try to
+               * handle that to enable backwards compatibility with
+               * older launchers.
+               */
               Time timestamp;
-              
+
               timestamp = sn_internal_string_to_ulong (values[i]);
 
               sequence->timestamp = timestamp;
+              sequence->timestamp_set = TRUE;
               changed = TRUE;
             }
           else if (strcmp (names[i], "WMCLASS") == 0)

@@ -41,6 +41,8 @@ SnLauncheeContext* sn_launchee_context_new_from_environment (SnDisplay         *
 void               sn_launchee_context_ref                  (SnLauncheeContext *context);
 void               sn_launchee_context_unref                (SnLauncheeContext *context);
 const char*        sn_launchee_context_get_startup_id       (SnLauncheeContext *context);
+int                sn_launchee_context_get_id_has_timestamp (SnLauncheeContext *context);
+Time               sn_launchee_context_get_timestamp        (SnLauncheeContext *context);
 void               sn_launchee_context_complete             (SnLauncheeContext *context);
 void               sn_launchee_context_setup_window         (SnLauncheeContext *context,
                                                              Window             xwindow);

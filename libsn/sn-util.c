@@ -310,6 +310,56 @@ sn_internal_string_to_ulong (const char* str)
   return retval;
 }
 
+/**
+ * sn_internal_find_last_occurrence:
+ * @haystack: a nul-terminated string.
+ * @needle: the nul-terminated string to search for.
+ *
+ * Searches the string @haystack for the last occurrence
+ * of the string @needle.
+ *
+ * Return value: a pointer to the found occurrence, or
+ *    %NULL if not found.
+ **/
+char*
+sn_internal_find_last_occurrence (const char* haystack, 
+                                  const char* needle)
+{
+  int i;
+  int needle_len;
+  int haystack_len;
+  const char *p;
+      
+  if (haystack == NULL)
+    return NULL;
+  if (needle == NULL)
+    return NULL;
+
+  needle_len = strlen (needle);
+  haystack_len = strlen (haystack);
+
+  if (needle_len == 0)
+    return (char *)haystack;
+
+  if (haystack_len < needle_len)
+    return NULL;
+  
+  p = haystack + haystack_len - needle_len;
+
+  while (p >= haystack)
+    {
+      for (i = 0; i < needle_len; i++)
+        if (p[i] != needle[i])
+          goto next;
+      
+      return (char *)p;
+      
+    next:
+      p--;
+    }
+  
+  return NULL;
+}
 
 void
 sn_internal_append_to_string (char      **append_to,

@@ -1,3 +1,9 @@
+2004-10-27  Havoc Pennington  <hp@redhat.com>
+
+	* patch from Elijah Newren 
+	http://bugzilla.gnome.org/show_bug.cgi?id=151245
+	to support new focus stealing prevention stuff.
+
 2004-06-24  Mark McLoughlin  <mark@skynet.ie>
 
 	* configure.in: post-release bump to 0.8.

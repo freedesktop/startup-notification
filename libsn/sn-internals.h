@@ -71,6 +71,9 @@ void      sn_internal_strfreev      (char      **strings);
 
 unsigned long sn_internal_string_to_ulong (const char* str);
 
+char*     sn_internal_find_last_occurrence (const char* haystack, 
+                                            const char* needle);
+
 void sn_internal_append_to_string (char      **append_to,
                                    int        *current_len,
                                    const char *append);

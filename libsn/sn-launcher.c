@@ -41,7 +41,6 @@ struct SnLauncherContext
   char               *name;
   char               *description;
   int                 workspace;
-  Time                timestamp;
   char               *wmclass;
   char               *binary_name;
   char               *icon_name;
@@ -81,7 +80,6 @@ sn_launcher_context_new (SnDisplay           *display,
   sn_display_ref (context->display);
 
   context->workspace = -1;
-  context->timestamp = 0;
   
   sn_list_prepend (context_list, context);
 
@@ -179,7 +177,6 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   char *values[MAX_PROPS];  
   char *message;
   char workspacebuf[257];
-  char timestampbuf[257];
   char screenbuf[257];
   
   if (context->startup_id != NULL)
@@ -205,15 +202,15 @@ sn_launcher_context_initiate (SnLauncherContext *context,
     256; /* 256 is longer than a couple %d and some slashes */
   
   s = sn_malloc (len + 3);
-  snprintf (s, len, "%s/%s/%lu/%d-%d-%s",
-            canonicalized_launcher, canonicalized_launchee, (unsigned long) timestamp,
-            (int) getpid (), (int) sequence_number, hostbuf);
+  snprintf (s, len, "%s/%s/%d-%d-%s_TIME%lu",
+            canonicalized_launcher, canonicalized_launchee,
+            (int) getpid (), (int) sequence_number, hostbuf,
+            (unsigned long) timestamp);
   ++sequence_number;
   
   sn_free (canonicalized_launcher);
   sn_free (canonicalized_launchee);
 
-  context->timestamp = timestamp;  
   context->startup_id = s;
   
   i = 0;
@@ -227,11 +224,6 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   values[i] = screenbuf;
   ++i;
   
-  names[i] = "TIMESTAMP";
-  sprintf (timestampbuf, "%lu", context->timestamp);
-  values[i] = timestampbuf;
-  ++i;
-
   if (context->name != NULL)
     {
       names[i] = "NAME";

@@ -209,7 +209,7 @@ All messages must include these keys:
   ID
  
           uniquely identifies a startup sequence; should be some globally 
-          unique string (for example, hostname+pid+current time).
+          unique string (for example, hostname+pid+"_TIME"+current time).
           The string should be in the form of <unique>_TIME<timestamp>,
           where the timestamp is the X server timestamp of the user
           action that caused the launch. See the TIMESTAMP key
