@@ -115,7 +115,8 @@ sn_internal_remove_xmessage_func (SnDisplay      *display,
 
   sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
                                          NULL);
-  
+
+  fhd.message_type = message_type;
   fhd.func = func;
   fhd.func_data = func_data;
   fhd.handler = NULL;
