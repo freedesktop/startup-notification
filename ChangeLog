@@ -1,3 +1,7 @@
+2002-10-27  Anders Carlsson  <andersca@gnu.org>
+
+	* test/Makefile.am: Use "libstartup-notification" instead of libsn.
+
 2002-10-25  Havoc Pennington  <hp@pobox.com>
 
 	* libstartup-notification-1.0.pc.in (Cflags): fix -I flag
