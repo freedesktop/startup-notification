@@ -1,5 +1,11 @@
 2003-01-20  Havoc Pennington  <hp@pobox.com>
 
+	* configure.in: 0.5
+
+	* NEWS: update
+
+2003-01-20  Havoc Pennington  <hp@pobox.com>
+
 	* libsn/sn-xmessages.c (sn_internal_remove_xmessage_func):
 	initialize message_type field in FindHandlerData, fix from 
 	Joe Marcus Clarke

@@ -1,1 +1,9 @@
-No news.
+0.5
+===
+
+  - Fix use of uninitialized memory when closing down a display (Joe Marcus Clarke)
+  - Make xmessage handling use per-display instead of global variables, 
+    fixing total hosage on multihead X servers
+  - set _NET_STARTUP_ID as a UTF-8 string
+  - fix a crash caused by zero-length message data
+  - include startup-notification.txt specification in the distribution
