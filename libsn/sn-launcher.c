@@ -169,6 +169,7 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   char *values[MAX_PROPS];  
   char *message;
   char workspacebuf[257];
+  char screenbuf[257];
   
   if (context->startup_id != NULL)
     {
@@ -209,6 +210,11 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   values[i] = context->startup_id;
   ++i;  
 
+  names[i] = "SCREEN";
+  sprintf (screenbuf, "%d", context->screen);
+  values[i] = screenbuf;
+  ++i;
+  
   if (context->name != NULL)
     {
       names[i] = "NAME";
@@ -225,7 +231,7 @@ sn_launcher_context_initiate (SnLauncherContext *context,
 
   if (context->workspace >= 0)
     {
-      names[i] = "DESCRIPTION";
+      names[i] = "DESKTOP";
       sprintf (workspacebuf, "%d", context->workspace);
       values[i] = workspacebuf;
       ++i;
@@ -251,7 +257,7 @@ sn_launcher_context_initiate (SnLauncherContext *context,
       values[i] = context->icon_name;
       ++i;
     }
-
+  
   assert (i < MAX_PROPS);
   
   names[i] = NULL;
@@ -383,4 +389,13 @@ sn_launcher_context_set_icon_name (SnLauncherContext *context,
 
   sn_free (context->icon_name);
   context->icon_name = sn_internal_strdup (name);
+}
+
+void
+sn_launcher_context_set_extra_property (SnLauncherContext *context,
+                                        const char        *name,
+                                        const char        *value)
+{
+  WARN_ALREADY_INITIATED (context);
+
 }

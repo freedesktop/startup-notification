@@ -1,3 +1,8 @@
+2002-11-01  Havoc Pennington  <hp@pobox.com>
+
+	* libsn/sn-launcher.c (sn_launcher_context_initiate): fill in
+	SCREEN env variable, and call DESKTOP that instead of DESCRIPTION
+
 2002-10-29  Havoc Pennington  <hp@pobox.com>
 
 	* configure.in: 0.3

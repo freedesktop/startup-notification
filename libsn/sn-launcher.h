@@ -61,6 +61,10 @@ void sn_launcher_context_set_binary_name (SnLauncherContext *context,
 void sn_launcher_context_set_icon_name   (SnLauncherContext *context,
                                           const char        *name);
 
+void sn_launcher_context_set_extra_property (SnLauncherContext *context,
+                                             const char        *name,
+                                             const char        *value);
+
 SN_END_DECLS
 
 #endif /* __SN_LAUNCHER_H__ */
