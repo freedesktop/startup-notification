@@ -1,0 +1,70 @@
+2002-09-20  Havoc Pennington  <hp@pobox.com>
+
+	* liblf/lf-monitor.c: implement support for xmessage-based
+	protocol.
+
+2002-09-20  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-xmessages.c: implement parsing the property lists 
+	as in KStartupInfo
+
+2002-09-20  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-xutils.c (lf_internal_send_event_all_screens): new
+	function
+
+	* liblf/lf-launcher.c (lf_launcher_context_initiate): use new
+	lf_internal_send_event_all_screens
+
+	* liblf/lf-xmessages.c: implement serializing strings
+	via client messages
+
+	* liblf/lf-common.c (lf_display_process_event): process xmessage
+	events
+
+2002-09-12  Havoc Pennington  <hp@pobox.com>
+
+	* liblf/lf-launcher.c (lf_launcher_context_initiate): validate
+	UTF-8 for the hostname
+
+2002-09-12  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-monitor.c: fixes
+
+2002-09-12  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-monitor.c: mostly workingish now
+
+2002-09-12  Havoc Pennington  <hp@pobox.com>
+
+	* test/test-monitor.c: test program for the monitor 
+	API
+
+	* liblf/lf-monitor.c: finishing up
+
+2002-09-11  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-monitor.c: hacking
+
+2002-09-10  Havoc Pennington  <hp@redhat.com>
+
+        * lotsa fixes and more work
+
+2002-09-10  Havoc Pennington  <hp@pobox.com>
+
+	* liblf/lf-launcher.c: more implementation hacking
+
+2002-09-09  Havoc Pennington  <hp@redhat.com>
+
+	* liblf/lf-list.c: add a list abstraction
+
+	* liblf/lf-launcher.c: start implementing
+
+	* liblf/lf-common.c (lf_display_process_event): update docs
+
+	* doc/launch-notification.txt: some small tweaks
+
+	* COPYING: include LGPL
+
+	* liblf/lf-util.c: fix the copyright
+

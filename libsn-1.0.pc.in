@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: liblf
+Description: Launch feedback library
+Version: @VERSION@
+Libs: -L${libdir} -llf-1
+Cflags: -I${includedir}/liblf-1.0
+
