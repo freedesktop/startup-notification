@@ -116,6 +116,12 @@ sn_launcher_context_unref (SnLauncherContext *context)
 
       sn_free (context->startup_id);      
 
+      sn_free (context->name);
+      sn_free (context->description);
+      sn_free (context->wmclass);
+      sn_free (context->binary_name);
+      sn_free (context->icon_name);
+
       sn_display_unref (context->display);
       sn_free (context);
     }

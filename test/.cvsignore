@@ -1,0 +1,9 @@
+.deps
+.libs
+Makefile
+Makefile.in
+test-launchee
+test-launcher
+test-monitor
+test-send-xmessage
+test-watch-xmessages

@@ -1,3 +1,9 @@
+2004-03-23  Mark McLoughlin  <mark@skynet.ie>
+
+	Leak plugging action from Tommi Leino <tommi.leino@movial.fi>
+
+	* libsn/sn-launcher.c: (sn_launcher_context_unref): plug leaks.
+
 2003-04-20  Havoc Pennington  <hp@pobox.com>
 
 	* use -no-undefined libtool flag on cygwin, from Masahiro Sakai 
