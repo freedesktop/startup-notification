@@ -22,75 +22,75 @@
  * SOFTWARE.
  */
 
-#ifndef __LF_XUTILS_H__
-#define __LF_XUTILS_H__
+#ifndef __SN_XUTILS_H__
+#define __SN_XUTILS_H__
 
-#include <liblf/lf-common.h>
+#include <libsn/sn-common.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-Atom lf_internal_atom_get        (LfDisplay  *display,
+Atom sn_internal_atom_get        (SnDisplay  *display,
                                   const char *atom_name);
-void lf_internal_set_utf8_string (LfDisplay  *display,
+void sn_internal_set_utf8_string (SnDisplay  *display,
                                   Window      xwindow,
                                   const char *property,
                                   const char *str);
-void lf_internal_set_string      (LfDisplay  *display,
+void sn_internal_set_string      (SnDisplay  *display,
                                   Window      xwindow,
                                   const char *property,
                                   const char *str);
-void lf_internal_set_cardinal    (LfDisplay  *display,
+void sn_internal_set_cardinal    (SnDisplay  *display,
                                   Window      xwindow,
                                   const char *property,
                                   int         val);
-void lf_internal_set_window        (LfDisplay  *display,
+void sn_internal_set_window        (SnDisplay  *display,
                                     Window      xwindow,
                                     const char *property,
                                     Window      val);
-void lf_internal_set_cardinal_list (LfDisplay  *display,
+void sn_internal_set_cardinal_list (SnDisplay  *display,
                                     Window      xwindow,
                                     const char *property,
                                     int        *vals,
                                     int         n_vals);
-void lf_internal_set_atom_list     (LfDisplay  *display,
+void sn_internal_set_atom_list     (SnDisplay  *display,
                                     Window      xwindow,
                                     const char *property,
                                     Atom       *vals,
                                     int         n_vals);
 
 
-lf_bool_t lf_internal_get_utf8_string   (LfDisplay   *display,
+sn_bool_t sn_internal_get_utf8_string   (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          char       **val);
-lf_bool_t lf_internal_get_string        (LfDisplay   *display,
+sn_bool_t sn_internal_get_string        (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          char       **val);
-lf_bool_t lf_internal_get_cardinal      (LfDisplay   *display,
+sn_bool_t sn_internal_get_cardinal      (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          int         *val);
-lf_bool_t lf_internal_get_window        (LfDisplay   *display,
+sn_bool_t sn_internal_get_window        (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          Window      *val);
-lf_bool_t lf_internal_get_atom_list     (LfDisplay   *display,
+sn_bool_t sn_internal_get_atom_list     (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          Atom       **atoms,
                                          int         *n_atoms);
-lf_bool_t lf_internal_get_cardinal_list (LfDisplay   *display,
+sn_bool_t sn_internal_get_cardinal_list (SnDisplay   *display,
                                          Window       xwindow,
                                          const char  *property,
                                          int        **vals,
                                          int         *n_vals);
 
-void lf_internal_send_event_all_screens (LfDisplay    *display,
+void sn_internal_send_event_all_screens (SnDisplay    *display,
                                          unsigned long mask,
                                          XEvent       *xevent);
 
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_XUTILS_H__ */
+#endif /* __SN_XUTILS_H__ */

@@ -23,46 +23,46 @@
  */
 
 
-#ifndef __LF_COMMON_H__
-#define __LF_COMMON_H__
+#ifndef __SN_COMMON_H__
+#define __SN_COMMON_H__
 
-#include <liblf/lf-util.h>
+#include <libsn/sn-util.h>
 #include <X11/Xlib.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-typedef struct LfDisplay LfDisplay;
+typedef struct SnDisplay SnDisplay;
 
 typedef enum
 {
-  LF_LAUNCH_TYPE_OTHER,
-  LF_LAUNCH_TYPE_DOCK_ICON,
-  LF_LAUNCH_TYPE_DESKTOP_ICON,
-  LF_LAUNCH_TYPE_MENU,
-  LF_LAUNCH_TYPE_KEY_SHORTCUT
+  SN_LAUNCH_TYPE_OTHER,
+  SN_LAUNCH_TYPE_DOCK_ICON,
+  SN_LAUNCH_TYPE_DESKTOP_ICON,
+  SN_LAUNCH_TYPE_MENU,
+  SN_LAUNCH_TYPE_KEY_SHORTCUT
 
-} LfLaunchType;
+} SnLaunchType;
 
-typedef void (* LfDisplayErrorTrapPush) (LfDisplay *display,
+typedef void (* SnDisplayErrorTrapPush) (SnDisplay *display,
                                          Display   *xdisplay);
-typedef void (* LfDisplayErrorTrapPop)  (LfDisplay *display,
+typedef void (* SnDisplayErrorTrapPop)  (SnDisplay *display,
                                          Display   *xdisplay);
 
-LfDisplay* lf_display_new             (Display                *xdisplay,
-                                       LfDisplayErrorTrapPush  push_trap_func,
-                                       LfDisplayErrorTrapPop   pop_trap_func);
-void       lf_display_ref             (LfDisplay              *display);
-void       lf_display_unref           (LfDisplay              *display);
-Display*   lf_display_get_x_display   (LfDisplay              *display);
-Screen*    lf_display_get_x_screen    (LfDisplay              *display,
+SnDisplay* sn_display_new             (Display                *xdisplay,
+                                       SnDisplayErrorTrapPush  push_trap_func,
+                                       SnDisplayErrorTrapPop   pop_trap_func);
+void       sn_display_ref             (SnDisplay              *display);
+void       sn_display_unref           (SnDisplay              *display);
+Display*   sn_display_get_x_display   (SnDisplay              *display);
+Screen*    sn_display_get_x_screen    (SnDisplay              *display,
                                        int                     number);
-lf_bool_t  lf_display_process_event   (LfDisplay              *display,
+sn_bool_t  sn_display_process_event   (SnDisplay              *display,
                                        XEvent                 *xevent);
-void       lf_display_error_trap_push (LfDisplay              *display);
-void       lf_display_error_trap_pop  (LfDisplay              *display);
+void       sn_display_error_trap_push (SnDisplay              *display);
+void       sn_display_error_trap_pop  (SnDisplay              *display);
 
 
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_COMMON_H__ */
+#endif /* __SN_COMMON_H__ */

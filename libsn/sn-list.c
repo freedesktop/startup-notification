@@ -23,69 +23,69 @@
  * SOFTWARE.
  */
 
-#include "lf-list.h"
-#include "lf-internals.h"
+#include "sn-list.h"
+#include "sn-internals.h"
 
-typedef struct LfListNode
+typedef struct SnListNode
 {
   void *data;
-  struct LfListNode *next;
-} LfListNode;
+  struct SnListNode *next;
+} SnListNode;
 
-struct LfList
+struct SnList
 {
-  LfListNode *head;
+  SnListNode *head;
 };
 
-static LfListNode*
-lf_list_node_alloc (void)
+static SnListNode*
+sn_list_node_alloc (void)
 {
-  return lf_new0 (LfListNode, 1);
+  return sn_new0 (SnListNode, 1);
 }
 
-LfList*
-lf_list_new (void)
+SnList*
+sn_list_new (void)
 {
-  LfList *list;
+  SnList *list;
 
-  list = lf_new (LfList, 1);
+  list = sn_new (SnList, 1);
   list->head = NULL;
 
   return list;
 }
 
 void
-lf_list_free (LfList *list)
+sn_list_free (SnList *list)
 {
-  LfListNode *node;
+  SnListNode *node;
 
   node = list->head;
   while (node != NULL)
     {
-      LfListNode *next = node->next;
+      SnListNode *next = node->next;
 
-      lf_free (node);
+      sn_free (node);
 
       node = next;
     }
 
-  lf_free (list);
+  sn_free (list);
 }
 
 void
-lf_list_prepend (LfList *list,
+sn_list_prepend (SnList *list,
                  void   *data)
 {
   if (list->head == NULL)
     {
-      list->head = lf_list_node_alloc ();
+      list->head = sn_list_node_alloc ();
       list->head->data = data;
     }
   else
     {
-      LfListNode *node;
+      SnListNode *node;
 
-      node = lf_list_node_alloc ();
+      node = sn_list_node_alloc ();
       node->data = data;
       node->next = list->head;
       list->head = node;
@@ -93,33 +93,33 @@ lf_list_prepend (LfList *list,
 }
 
 void
-lf_list_append (LfList *list,
+sn_list_append (SnList *list,
                 void   *data)
 {
   if (list->head == NULL)
     {
-      list->head = lf_list_node_alloc ();
+      list->head = sn_list_node_alloc ();
       list->head->data = data;
     }
   else
     {
-      LfListNode *node;
+      SnListNode *node;
       
       node = list->head;
       while (node->next != NULL)
         node = node->next;
       
-      node->next = lf_list_node_alloc ();
+      node->next = sn_list_node_alloc ();
       node->next->data = data;
     }
 }
 
 void
-lf_list_remove (LfList *list,
+sn_list_remove (SnList *list,
                 void   *data)
 {
-  LfListNode *node;
-  LfListNode *prev;
+  SnListNode *node;
+  SnListNode *prev;
 
   prev = NULL;
   node = list->head;
@@ -132,7 +132,7 @@ lf_list_remove (LfList *list,
           else
             list->head = node->next;
 
-          lf_free (node);
+          sn_free (node);
 
           return;
         }
@@ -143,16 +143,16 @@ lf_list_remove (LfList *list,
 }
 
 void
-lf_list_foreach (LfList            *list,
-                 LfListForeachFunc  func,
+sn_list_foreach (SnList            *list,
+                 SnListForeachFunc  func,
                  void              *data)
 {
-  LfListNode *node;
+  SnListNode *node;
 
   node = list->head;
   while (node != NULL)
     {
-      LfListNode *next = node->next; /* reentrancy safety */
+      SnListNode *next = node->next; /* reentrancy safety */
       
       if (!(* func) (node->data, data))
         return;
@@ -161,8 +161,8 @@ lf_list_foreach (LfList            *list,
     }
 }
 
-lf_bool_t
-lf_list_empty (LfList *list)
+sn_bool_t
+sn_list_empty (SnList *list)
 {
   return list->head == NULL;
 }

@@ -1,3 +1,3 @@
 
-SUBDIRS=liblf test
+SUBDIRS=libsn test
 

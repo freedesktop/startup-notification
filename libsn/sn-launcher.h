@@ -24,80 +24,80 @@
  */
 
 
-#ifndef __LF_LAUNCHER_H__
-#define __LF_LAUNCHER_H__
+#ifndef __SN_LAUNCHER_H__
+#define __SN_LAUNCHER_H__
 
-#include <liblf/lf-common.h>
+#include <libsn/sn-common.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-typedef struct LfLauncherContext LfLauncherContext;
-typedef struct LfLauncherEvent   LfLauncherEvent;
+typedef struct SnLauncherContext SnLauncherContext;
+typedef struct SnLauncherEvent   SnLauncherEvent;
 
-typedef void (* LfLauncherEventFunc) (LfLauncherEvent *event,
+typedef void (* SnLauncherEventFunc) (SnLauncherEvent *event,
                                       void            *user_data);
 
 typedef enum
 {
-  LF_LAUNCHER_EVENT_CANCELED,
-  LF_LAUNCHER_EVENT_COMPLETED,
-  LF_LAUNCHER_EVENT_PULSE
-} LfLauncherEventType;
+  SN_LAUNCHER_EVENT_CANCELED,
+  SN_LAUNCHER_EVENT_COMPLETED,
+  SN_LAUNCHER_EVENT_PULSE
+} SnLauncherEventType;
 
-LfLauncherContext* lf_launcher_context_new   (LfDisplay           *display,
-                                              LfLauncherEventFunc  event_func,
+SnLauncherContext* sn_launcher_context_new   (SnDisplay           *display,
+                                              SnLauncherEventFunc  event_func,
                                               void                *event_func_data,
-                                              LfFreeFunc           free_data_func);
-void        lf_launcher_context_ref               (LfLauncherContext *context);
-void        lf_launcher_context_unref             (LfLauncherContext *context);
+                                              SnFreeFunc           free_data_func);
+void        sn_launcher_context_ref               (SnLauncherContext *context);
+void        sn_launcher_context_unref             (SnLauncherContext *context);
 
 
-void        lf_launcher_context_initiate          (LfLauncherContext *context,
+void        sn_launcher_context_initiate          (SnLauncherContext *context,
                                                    const char        *launcher_name,
                                                    const char        *launchee_name,
                                                    Time               timestamp);
-Window      lf_launcher_context_get_launch_window (LfLauncherContext *context);
-const char* lf_launcher_context_get_launch_id     (LfLauncherContext *context);
-lf_bool_t   lf_launcher_context_get_initiated     (LfLauncherContext *context);
-lf_bool_t   lf_launcher_context_get_canceled      (LfLauncherContext *context);
-lf_bool_t   lf_launcher_context_get_completed     (LfLauncherContext *context);
-void        lf_launcher_context_cancel            (LfLauncherContext *context);
-void        lf_launcher_context_complete          (LfLauncherContext *context);
+Window      sn_launcher_context_get_launch_window (SnLauncherContext *context);
+const char* sn_launcher_context_get_launch_id     (SnLauncherContext *context);
+sn_bool_t   sn_launcher_context_get_initiated     (SnLauncherContext *context);
+sn_bool_t   sn_launcher_context_get_canceled      (SnLauncherContext *context);
+sn_bool_t   sn_launcher_context_get_completed     (SnLauncherContext *context);
+void        sn_launcher_context_cancel            (SnLauncherContext *context);
+void        sn_launcher_context_complete          (SnLauncherContext *context);
 
-void        lf_launcher_context_setup_child_process (LfLauncherContext *context);
+void        sn_launcher_context_setup_child_process (SnLauncherContext *context);
 
-void lf_launcher_context_set_launch_type           (LfLauncherContext *context,
-                                                    LfLaunchType       type);
-void lf_launcher_context_set_geometry_window       (LfLauncherContext *context,
+void sn_launcher_context_set_launch_type           (SnLauncherContext *context,
+                                                    SnLaunchType       type);
+void sn_launcher_context_set_geometry_window       (SnLauncherContext *context,
                                                     Window             xwindow);
-void lf_launcher_context_set_supports_cancel       (LfLauncherContext *context,
-                                                    lf_bool_t          supports_cancel);
-void lf_launcher_context_set_launch_name           (LfLauncherContext *context,
+void sn_launcher_context_set_supports_cancel       (SnLauncherContext *context,
+                                                    sn_bool_t          supports_cancel);
+void sn_launcher_context_set_launch_name           (SnLauncherContext *context,
                                                     const char        *name);
-void lf_launcher_context_set_launch_description    (LfLauncherContext *context,
+void sn_launcher_context_set_launch_description    (SnLauncherContext *context,
                                                     const char        *description);
-void lf_launcher_context_set_launch_workspace      (LfLauncherContext *context,
+void sn_launcher_context_set_launch_workspace      (SnLauncherContext *context,
                                                     int                workspace);
-void lf_launcher_context_set_legacy_resource_class (LfLauncherContext *context,
+void sn_launcher_context_set_legacy_resource_class (SnLauncherContext *context,
                                                     const char        *klass);
-void lf_launcher_context_set_legacy_resource_name  (LfLauncherContext *context,
+void sn_launcher_context_set_legacy_resource_name  (SnLauncherContext *context,
                                                     const char        *name);
-void lf_launcher_context_set_legacy_window_title   (LfLauncherContext *context,
+void sn_launcher_context_set_legacy_window_title   (SnLauncherContext *context,
                                                     const char        *title);
-void lf_launcher_context_set_binary_name           (LfLauncherContext *context,
+void sn_launcher_context_set_binary_name           (SnLauncherContext *context,
                                                     const char        *name);
-void lf_launcher_context_set_pid                   (LfLauncherContext *context,
+void sn_launcher_context_set_pid                   (SnLauncherContext *context,
                                                     int                pid);
-void lf_launcher_context_set_icon_name             (LfLauncherContext *context,
+void sn_launcher_context_set_icon_name             (SnLauncherContext *context,
                                                     const char        *name);
 
-LfLauncherEvent*    lf_launcher_event_copy        (LfLauncherEvent *event);
-void                lf_launcher_event_ref         (LfLauncherEvent *event);
-void                lf_launcher_event_unref       (LfLauncherEvent *event);
-LfLauncherEventType lf_launcher_event_get_type    (LfLauncherEvent *event);
-LfLauncherContext*  lf_launcher_event_get_context (LfLauncherEvent *event);
-Time                lf_launcher_event_get_time    (LfLauncherEvent *event);
+SnLauncherEvent*    sn_launcher_event_copy        (SnLauncherEvent *event);
+void                sn_launcher_event_ref         (SnLauncherEvent *event);
+void                sn_launcher_event_unref       (SnLauncherEvent *event);
+SnLauncherEventType sn_launcher_event_get_type    (SnLauncherEvent *event);
+SnLauncherContext*  sn_launcher_event_get_context (SnLauncherEvent *event);
+Time                sn_launcher_event_get_time    (SnLauncherEvent *event);
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_LAUNCHER_H__ */
+#endif /* __SN_LAUNCHER_H__ */

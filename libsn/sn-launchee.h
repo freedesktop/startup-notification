@@ -24,29 +24,29 @@
  */
 
 
-#ifndef __LF_LAUNCHEE_H__
-#define __LF_LAUNCHEE_H__
+#ifndef __SN_LAUNCHEE_H__
+#define __SN_LAUNCHEE_H__
 
-#include <liblf/lf-common.h>
+#include <libsn/sn-common.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-typedef struct LfLauncheeContext LfLauncheeContext;
+typedef struct SnLauncheeContext SnLauncheeContext;
 
-LfLauncheeContext* lf_launchee_context_new                  (LfDisplay         *display,
+SnLauncheeContext* sn_launchee_context_new                  (SnDisplay         *display,
                                                              const char        *launch_id,
                                                              Window             launch_window);
-LfLauncheeContext* lf_launchee_context_new_from_environment (LfDisplay         *display);
-void               lf_launchee_context_ref                  (LfLauncheeContext *context);
-void               lf_launchee_context_unref                (LfLauncheeContext *context);
-Window             lf_launchee_context_get_launch_window    (LfLauncheeContext *context);
-const char*        lf_launchee_context_get_launch_id        (LfLauncheeContext *context);
-void               lf_launchee_context_pulse                (LfLauncheeContext *context);
-void               lf_launchee_context_cancel               (LfLauncheeContext *context);
-void               lf_launchee_context_complete             (LfLauncheeContext *context);
-void               lf_launchee_context_setup_window         (LfLauncheeContext *context,
+SnLauncheeContext* sn_launchee_context_new_from_environment (SnDisplay         *display);
+void               sn_launchee_context_ref                  (SnLauncheeContext *context);
+void               sn_launchee_context_unref                (SnLauncheeContext *context);
+Window             sn_launchee_context_get_launch_window    (SnLauncheeContext *context);
+const char*        sn_launchee_context_get_launch_id        (SnLauncheeContext *context);
+void               sn_launchee_context_pulse                (SnLauncheeContext *context);
+void               sn_launchee_context_cancel               (SnLauncheeContext *context);
+void               sn_launchee_context_complete             (SnLauncheeContext *context);
+void               sn_launchee_context_setup_window         (SnLauncheeContext *context,
                                                              Window             xwindow);
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_LAUNCHEE_H__ */
+#endif /* __SN_LAUNCHEE_H__ */

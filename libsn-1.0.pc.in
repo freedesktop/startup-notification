@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: liblf
+Name: libsn
 Description: Launch feedback library
 Version: @VERSION@
-Libs: -L${libdir} -llf-1
-Cflags: -I${includedir}/liblf-1.0
+Libs: -L${libdir} -lsn-1
+Cflags: -I${includedir}/libsn-1.0
 

@@ -18,8 +18,8 @@
  */
 
 #include <config.h>
-#include "lf-util.h"
-#include "lf-internals.h"
+#include "sn-util.h"
+#include "sn-internals.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,7 +29,7 @@
 #ifndef	REALLOC_0_WORKS
 static void*
 standard_realloc (void* mem,
-		  lf_size_t    n_bytes)
+		  sn_size_t    n_bytes)
 {
   if (!mem)
     return malloc (n_bytes);
@@ -49,14 +49,14 @@ standard_realloc (void* mem,
 #  define standard_try_realloc	realloc
 #else	/* !SANE_MALLOC_PROTOS */
 static void*
-standard_malloc (lf_size_t n_bytes)
+standard_malloc (sn_size_t n_bytes)
 {
   return malloc (n_bytes);
 }
 #  ifdef REALLOC_0_WORKS
 static void*
 standard_realloc (void* mem,
-		  lf_size_t    n_bytes)
+		  sn_size_t    n_bytes)
 {
   return realloc (mem, n_bytes);
 }
@@ -67,8 +67,8 @@ standard_free (void* mem)
   free (mem);
 }
 static void*
-standard_calloc (lf_size_t n_blocks,
-		 lf_size_t n_bytes)
+standard_calloc (sn_size_t n_blocks,
+		 sn_size_t n_bytes)
 {
   return calloc (n_blocks, n_bytes);
 }
@@ -78,7 +78,7 @@ standard_calloc (lf_size_t n_blocks,
 
 
 /* --- variables --- */
-static LfMemVTable lf_mem_vtable = {
+static SnMemVTable sn_mem_vtable = {
   standard_malloc,
   standard_realloc,
   standard_free,
@@ -92,18 +92,18 @@ static LfMemVTable lf_mem_vtable = {
 
 /* --- functions --- */
 void*
-lf_malloc (lf_size_t n_bytes)
+sn_malloc (sn_size_t n_bytes)
 {
   if (n_bytes)
     {
       void* mem;
 
-      mem = lf_mem_vtable.malloc (n_bytes);
+      mem = sn_mem_vtable.malloc (n_bytes);
       if (mem)
 	return mem;
 
       fprintf (stderr,
-               "liblf: failed to allocate %lu bytes",
+               "libsn: failed to allocate %lu bytes",
                (unsigned long) n_bytes);
     }
 
@@ -111,18 +111,18 @@ lf_malloc (lf_size_t n_bytes)
 }
 
 void*
-lf_malloc0 (lf_size_t n_bytes)
+sn_malloc0 (sn_size_t n_bytes)
 {
   if (n_bytes)
     {
       void* mem;
 
-      mem = lf_mem_vtable.calloc (1, n_bytes);
+      mem = sn_mem_vtable.calloc (1, n_bytes);
       if (mem)
 	return mem;
 
       fprintf (stderr,
-               "liblf: failed to allocate %lu bytes",
+               "libsn: failed to allocate %lu bytes",
                (unsigned long) n_bytes);
     }
 
@@ -130,61 +130,61 @@ lf_malloc0 (lf_size_t n_bytes)
 }
 
 void*
-lf_realloc (void     *mem,
-            lf_size_t n_bytes)
+sn_realloc (void     *mem,
+            sn_size_t n_bytes)
 {
   if (n_bytes)
     {
-      mem = lf_mem_vtable.realloc (mem, n_bytes);
+      mem = sn_mem_vtable.realloc (mem, n_bytes);
       if (mem)
 	return mem;
 
       fprintf (stderr,
-               "liblf: failed to allocate %lu bytes",
+               "libsn: failed to allocate %lu bytes",
                (unsigned long) n_bytes);
     }
 
   if (mem)
-    lf_mem_vtable.free (mem);
+    sn_mem_vtable.free (mem);
 
   return NULL;
 }
 
 void
-lf_free (void* mem)
+sn_free (void* mem)
 {
   if (mem)
-    lf_mem_vtable.free (mem);
+    sn_mem_vtable.free (mem);
 }
 
 void*
-lf_try_malloc (lf_size_t n_bytes)
+sn_try_malloc (sn_size_t n_bytes)
 {
   if (n_bytes)
-    return lf_mem_vtable.try_malloc (n_bytes);
+    return sn_mem_vtable.try_malloc (n_bytes);
   else
     return NULL;
 }
 
 void*
-lf_try_realloc (void       *mem,
-                lf_size_t   n_bytes)
+sn_try_realloc (void       *mem,
+                sn_size_t   n_bytes)
 {
   if (n_bytes)
-    return lf_mem_vtable.try_realloc (mem, n_bytes);
+    return sn_mem_vtable.try_realloc (mem, n_bytes);
 
   if (mem)
-    lf_mem_vtable.free (mem);
+    sn_mem_vtable.free (mem);
 
   return NULL;
 }
 
 static void*
-fallback_calloc (lf_size_t n_blocks,
-		 lf_size_t n_block_bytes)
+fallback_calloc (sn_size_t n_blocks,
+		 sn_size_t n_block_bytes)
 {
-  lf_size_t l = n_blocks * n_block_bytes;
-  void* mem = lf_mem_vtable.malloc (l);
+  sn_size_t l = n_blocks * n_block_bytes;
+  void* mem = sn_mem_vtable.malloc (l);
 
   if (mem)
     memset (mem, 0, l);
@@ -192,52 +192,52 @@ fallback_calloc (lf_size_t n_blocks,
   return mem;
 }
 
-static lf_bool_t vtable_set = FALSE;
+static sn_bool_t vtable_set = FALSE;
 
-lf_bool_t
-lf_mem_is_system_malloc (void)
+sn_bool_t
+sn_mem_is_system_malloc (void)
 {
   return !vtable_set;
 }
 
 void
-lf_mem_set_vtable (LfMemVTable *vtable)
+sn_mem_set_vtable (SnMemVTable *vtable)
 {
   if (!vtable_set)
     {
       vtable_set = TRUE;
       if (vtable->malloc && vtable->realloc && vtable->free)
 	{
-	  lf_mem_vtable.malloc = vtable->malloc;
-	  lf_mem_vtable.realloc = vtable->realloc;
-	  lf_mem_vtable.free = vtable->free;
-	  lf_mem_vtable.calloc = vtable->calloc ? vtable->calloc : fallback_calloc;
-	  lf_mem_vtable.try_malloc = vtable->try_malloc ? vtable->try_malloc : lf_mem_vtable.malloc;
-	  lf_mem_vtable.try_realloc = vtable->try_realloc ? vtable->try_realloc : lf_mem_vtable.realloc;
+	  sn_mem_vtable.malloc = vtable->malloc;
+	  sn_mem_vtable.realloc = vtable->realloc;
+	  sn_mem_vtable.free = vtable->free;
+	  sn_mem_vtable.calloc = vtable->calloc ? vtable->calloc : fallback_calloc;
+	  sn_mem_vtable.try_malloc = vtable->try_malloc ? vtable->try_malloc : sn_mem_vtable.malloc;
+	  sn_mem_vtable.try_realloc = vtable->try_realloc ? vtable->try_realloc : sn_mem_vtable.realloc;
 	}
       else
         {
           fprintf (stderr,
-                   "liblf: memory allocation vtable lacks one of malloc(), realloc() or free()");
+                   "libsn: memory allocation vtable lacks one of malloc(), realloc() or free()");
         }
     }
   else
     {
       fprintf (stderr,
-               "liblf: memory allocation vtable can only be set once at startup");
+               "libsn: memory allocation vtable can only be set once at startup");
     }
 }
 
-static LfUtf8ValidateFunc utf8_validator = NULL;
+static SnUtf8ValidateFunc utf8_validator = NULL;
 
 void
-lf_set_utf8_validator (LfUtf8ValidateFunc validate_func)
+sn_set_utf8_validator (SnUtf8ValidateFunc validate_func)
 {
   utf8_validator = validate_func;
 }
 
-lf_bool_t
-lf_internal_utf8_validate (const char *str,
+sn_bool_t
+sn_internal_utf8_validate (const char *str,
                            int         max_len)
 {
   if (utf8_validator)
@@ -251,25 +251,25 @@ lf_internal_utf8_validate (const char *str,
 }
 
 char*
-lf_internal_strdup (const char *str)
+sn_internal_strdup (const char *str)
 {
   char *s;
 
-  s = lf_malloc (strlen (str) + 1);
+  s = sn_malloc (strlen (str) + 1);
   strcpy (s, str);
 
   return s;
 }
 
 char*
-lf_internal_strndup (const char *str,
+sn_internal_strndup (const char *str,
                      int         n)
 {
   char *new_str;
   
   if (str)
     {
-      new_str = lf_new (char, n + 1);
+      new_str = sn_new (char, n + 1);
       strncpy (new_str, str, n);
       new_str[n] = '\0';
     }
@@ -280,7 +280,7 @@ lf_internal_strndup (const char *str,
 }
 
 void
-lf_internal_strfreev (char **strings)
+sn_internal_strfreev (char **strings)
 {
   int i;
 
@@ -290,14 +290,14 @@ lf_internal_strfreev (char **strings)
   i = 0;
   while (strings[i])
     {
-      lf_free (strings[i]);
+      sn_free (strings[i]);
       ++i;
     }
-  lf_free (strings);
+  sn_free (strings);
 }
 
 unsigned long
-lf_internal_string_to_ulong (const char* str)
+sn_internal_string_to_ulong (const char* str)
 {
   unsigned long retval;
   char *end;

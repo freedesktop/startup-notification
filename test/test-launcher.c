@@ -23,31 +23,31 @@
  */
 
 #include <config.h>
-#include <liblf/lf.h>
+#include <libsn/sn.h>
 
 #include "test-boilerplate.h"
 
 static pid_t child_pid = 0;
 
 static void
-launcher_event_func (LfLauncherEvent *event,
+launcher_event_func (SnLauncherEvent *event,
                      void            *user_data)
 {
-  LfLauncherContext *context;
+  SnLauncherContext *context;
 
-  context = lf_launcher_event_get_context (event);
+  context = sn_launcher_event_get_context (event);
   
-  switch (lf_launcher_event_get_type (event))
+  switch (sn_launcher_event_get_type (event))
     {
-    case LF_LAUNCHER_EVENT_COMPLETED:
+    case SN_LAUNCHER_EVENT_COMPLETED:
       printf ("Completed!\n");
       break;
-    case LF_LAUNCHER_EVENT_CANCELED:
+    case SN_LAUNCHER_EVENT_CANCELED:
       printf ("Canceled!\n");
       kill (child_pid, SIGTERM);
-      lf_launcher_context_complete (context);
+      sn_launcher_context_complete (context);
       break;
-    case LF_LAUNCHER_EVENT_PULSE:
+    case SN_LAUNCHER_EVENT_PULSE:
       printf (" pulse.\n");
       break;
     }
@@ -57,8 +57,8 @@ int
 main (int argc, char **argv)
 {
   Display *xdisplay;
-  LfDisplay *display;
-  LfLauncherContext *context;
+  SnDisplay *display;
+  SnLauncherContext *context;
 
   if (argc < 2)
     {
@@ -73,25 +73,25 @@ main (int argc, char **argv)
       return 1;
     }
 
-  if (getenv ("LIBLF_SYNC") != NULL)
+  if (getenv ("LIBSN_SYNC") != NULL)
     XSynchronize (xdisplay, True);
   
   XSetErrorHandler (x_error_handler);
   
-  display = lf_display_new (xdisplay,
+  display = sn_display_new (xdisplay,
                             error_trap_push,
                             error_trap_pop);
 
-  context = lf_launcher_context_new (display,
+  context = sn_launcher_context_new (display,
                                      launcher_event_func,
                                      NULL, NULL);  
 
-  lf_launcher_context_set_launch_name (context, "Test Launch");
-  lf_launcher_context_set_launch_description (context, "Launching a test program for liblf");
-  lf_launcher_context_set_supports_cancel (context, TRUE);
-  lf_launcher_context_set_binary_name (context, argv[1]);
+  sn_launcher_context_set_launch_name (context, "Test Launch");
+  sn_launcher_context_set_launch_description (context, "Launching a test program for libsn");
+  sn_launcher_context_set_supports_cancel (context, TRUE);
+  sn_launcher_context_set_binary_name (context, argv[1]);
   
-  lf_launcher_context_initiate (context,
+  sn_launcher_context_initiate (context,
                                 "test-launcher",
                                 argv[1],
                                 CurrentTime); /* CurrentTime bad */
@@ -102,14 +102,14 @@ main (int argc, char **argv)
       fprintf (stderr, "Fork failed: %s\n", strerror (errno));
       break;
     case 0:
-      lf_launcher_context_setup_child_process (context);
+      sn_launcher_context_setup_child_process (context);
       execv (argv[1], argv + 1);
       fprintf (stderr, "Failed to exec %s: %s\n", argv[1], strerror (errno));
       _exit (1);
       break;
     }
 
-  lf_launcher_context_set_pid (context, child_pid);
+  sn_launcher_context_set_pid (context, child_pid);
   
   while (TRUE)
     {
@@ -117,10 +117,10 @@ main (int argc, char **argv)
 
       XNextEvent (xdisplay, &xevent);
 
-      lf_display_process_event (display, &xevent);
+      sn_display_process_event (display, &xevent);
     }
 
-  lf_launcher_context_unref (context);
+  sn_launcher_context_unref (context);
   
   return 0;
 }

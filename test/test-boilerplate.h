@@ -101,14 +101,14 @@ x_error_handler (Display     *xdisplay,
 }
 
 static void
-error_trap_push (LfDisplay *display,
+error_trap_push (SnDisplay *display,
                  Display   *xdisplay)
 {
   ++error_trap_depth;
 }
 
 static void
-error_trap_pop (LfDisplay *display,
+error_trap_pop (SnDisplay *display,
                 Display   *xdisplay)
 {
   if (error_trap_depth == 0)

@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 
-#include "lf-xmessages.h"
-#include "lf-list.h"
-#include "lf-internals.h"
+#include "sn-xmessages.h"
+#include "sn-list.h"
+#include "sn-internals.h"
 
 typedef struct
 {
   Display       *xdisplay;
   Atom           type_atom;
   char          *message_type;
-  LfXmessageFunc func;
+  SnXmessageFunc func;
   void          *func_data;
-  LfFreeFunc     free_data_func;
-} LfXmessageHandler;
+  SnFreeFunc     free_data_func;
+} SnXmessageHandler;
 
 typedef struct
 {
@@ -42,49 +42,49 @@ typedef struct
   Window xwindow;
   char *message;
   int allocated;
-} LfXmessage;
+} SnXmessage;
 
-static LfList *xmessage_funcs = NULL;
-static LfList *pending_messages = NULL;
+static SnList *xmessage_funcs = NULL;
+static SnList *pending_messages = NULL;
 
 void
-lf_internal_add_xmessage_func (LfDisplay      *display,
+sn_internal_add_xmessage_func (SnDisplay      *display,
                                const char     *message_type,
-                               LfXmessageFunc  func,
+                               SnXmessageFunc  func,
                                void           *func_data,
-                               LfFreeFunc      free_data_func)
+                               SnFreeFunc      free_data_func)
 {
-  LfXmessageHandler *handler;
+  SnXmessageHandler *handler;
   
   if (xmessage_funcs == NULL)
-    xmessage_funcs = lf_list_new ();
+    xmessage_funcs = sn_list_new ();
 
-  handler = lf_new0 (LfXmessageHandler, 1);
+  handler = sn_new0 (SnXmessageHandler, 1);
 
-  handler->xdisplay = lf_display_get_x_display (display);
-  handler->type_atom = lf_internal_atom_get (display, message_type);
-  handler->message_type = lf_internal_strdup (message_type);
+  handler->xdisplay = sn_display_get_x_display (display);
+  handler->type_atom = sn_internal_atom_get (display, message_type);
+  handler->message_type = sn_internal_strdup (message_type);
   handler->func= func;
   handler->func_data = func_data;
   handler->free_data_func = free_data_func;
   
-  lf_list_prepend (xmessage_funcs, handler);
+  sn_list_prepend (xmessage_funcs, handler);
 }
 
 typedef struct
 {
   const char *message_type;
-  LfXmessageFunc func;
+  SnXmessageFunc func;
   void *func_data;
-  LfXmessageHandler *handler;
+  SnXmessageHandler *handler;
 } FindHandlerData;
 
-static lf_bool_t
+static sn_bool_t
 find_handler_foreach (void *value,
                       void *data)
 {
   FindHandlerData *fhd = data;
-  LfXmessageHandler *handler = value;
+  SnXmessageHandler *handler = value;
 
   if (handler->func == fhd->func &&
       handler->func_data == fhd->func_data &&
@@ -98,9 +98,9 @@ find_handler_foreach (void *value,
 }
 
 void
-lf_internal_remove_xmessage_func (LfDisplay      *display,
+sn_internal_remove_xmessage_func (SnDisplay      *display,
                                   const char     *message_type,
-                                  LfXmessageFunc  func,
+                                  SnXmessageFunc  func,
                                   void           *func_data)
 {
   FindHandlerData fhd;
@@ -110,23 +110,23 @@ lf_internal_remove_xmessage_func (LfDisplay      *display,
   fhd.handler = NULL;
 
   if (xmessage_funcs != NULL)
-    lf_list_foreach (xmessage_funcs, find_handler_foreach, &fhd);
+    sn_list_foreach (xmessage_funcs, find_handler_foreach, &fhd);
 
   if (fhd.handler != NULL)
     {
-      lf_list_remove (xmessage_funcs, fhd.handler);
+      sn_list_remove (xmessage_funcs, fhd.handler);
 
-      lf_free (fhd.handler->message_type);
+      sn_free (fhd.handler->message_type);
       
       if (fhd.handler->free_data_func)
         (* fhd.handler->free_data_func) (fhd.handler->func_data);
       
-      lf_free (fhd.handler);
+      sn_free (fhd.handler);
     }
 }
 
 void
-lf_internal_broadcast_xmessage   (LfDisplay      *display,
+sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                   const char     *message_type,
                                   const char     *message)
 {
@@ -134,7 +134,7 @@ lf_internal_broadcast_xmessage   (LfDisplay      *display,
   Window xwindow;
   Display *xdisplay;
 
-  if (!lf_internal_utf8_validate (message, -1))
+  if (!sn_internal_utf8_validate (message, -1))
     {
       fprintf (stderr,
                "Attempted to send non-UTF-8 X message: %s\n",
@@ -142,7 +142,7 @@ lf_internal_broadcast_xmessage   (LfDisplay      *display,
       return;
     }
 
-  xdisplay = lf_display_get_x_display (display);
+  xdisplay = sn_display_get_x_display (display);
 
   {
     XSetWindowAttributes attrs;
@@ -162,7 +162,7 @@ lf_internal_broadcast_xmessage   (LfDisplay      *display,
                      &attrs);
   }
 
-  type_atom = lf_internal_atom_get (display, message_type);
+  type_atom = sn_internal_atom_get (display, message_type);
   
   {
     XEvent xevent;
@@ -193,7 +193,7 @@ lf_internal_broadcast_xmessage   (LfDisplay      *display,
             ++src;
           }
 
-        lf_internal_send_event_all_screens (display, PropertyChangeMask,
+        sn_internal_send_event_all_screens (display, PropertyChangeMask,
                                             &xevent);
       }
   }
@@ -206,14 +206,14 @@ typedef struct
 {
   Display *xdisplay;
   Atom atom;
-  lf_bool_t found_handler;
+  sn_bool_t found_handler;
 } HandlerForAtomData;
 
-static lf_bool_t
+static sn_bool_t
 handler_for_atom_foreach (void *value,
                           void *data)
 {
-  LfXmessageHandler *handler = value;
+  SnXmessageHandler *handler = value;
   HandlerForAtomData *hfad = data;
 
   if (handler->xdisplay == hfad->xdisplay &&
@@ -226,18 +226,18 @@ handler_for_atom_foreach (void *value,
     return TRUE;
 }
 
-static lf_bool_t
-some_handler_handles_event (LfDisplay *display,
+static sn_bool_t
+some_handler_handles_event (SnDisplay *display,
                             XEvent    *xevent)
 {
   HandlerForAtomData hfad;
 
   hfad.atom = xevent->xclient.message_type;
-  hfad.xdisplay = lf_display_get_x_display (display);
+  hfad.xdisplay = sn_display_get_x_display (display);
   hfad.found_handler = FALSE;
 
   if (xmessage_funcs)
-    lf_list_foreach (xmessage_funcs,
+    sn_list_foreach (xmessage_funcs,
                      handler_for_atom_foreach,
                      &hfad);
 
@@ -248,14 +248,14 @@ typedef struct
 {
   Display *xdisplay;
   XEvent *xevent;
-  LfXmessage *message;
+  SnXmessage *message;
 } FindMessageData;
 
-static lf_bool_t
+static sn_bool_t
 find_message_foreach (void *value,
                       void *data)
 {
-  LfXmessage *message = value;
+  SnXmessage *message = value;
   FindMessageData *fmd = data;
 
   if (fmd->xevent->xclient.window ==
@@ -270,35 +270,35 @@ find_message_foreach (void *value,
   return TRUE;
 }
 
-static LfXmessage*
-add_event_to_messages (LfDisplay *display,
+static SnXmessage*
+add_event_to_messages (SnDisplay *display,
                        XEvent    *xevent)
 {
   FindMessageData fmd;
-  LfXmessage *message;
+  SnXmessage *message;
   const char *src;
   const char *src_end;
   char *dest;
-  lf_bool_t completed;
+  sn_bool_t completed;
   
   /* We don't want screwy situations to end up causing us to allocate
    * infinite memory. Cap the length of a message.
    */
 #define MAX_MESSAGE_LENGTH 4096
   
-  fmd.xdisplay = lf_display_get_x_display (display);
+  fmd.xdisplay = sn_display_get_x_display (display);
   fmd.xevent = xevent;
   fmd.message = NULL;
 
   if (pending_messages)
-    lf_list_foreach (pending_messages, find_message_foreach, &fmd);
+    sn_list_foreach (pending_messages, find_message_foreach, &fmd);
 
   message = fmd.message;
 
   if (message == NULL)
     {
       /* Create a new message */
-      message = lf_new0 (LfXmessage, 1);
+      message = sn_new0 (SnXmessage, 1);
 
       message->type_atom = xevent->xclient.message_type;
       message->xwindow = xevent->xclient.window;
@@ -306,24 +306,24 @@ add_event_to_messages (LfDisplay *display,
       message->allocated = 0;
 
       if (pending_messages == NULL)
-        pending_messages = lf_list_new ();
+        pending_messages = sn_list_new ();
 
-      lf_list_prepend (pending_messages, message);
+      sn_list_prepend (pending_messages, message);
     }
 
   if (message->allocated > MAX_MESSAGE_LENGTH)
     {
       /* This message is some kind of crap - just dump it. */
-      lf_free (message->message);
-      lf_list_remove (pending_messages, message);
-      lf_free (message);
+      sn_free (message->message);
+      sn_list_remove (pending_messages, message);
+      sn_free (message);
       return NULL;
     }
   
   src = &xevent->xclient.data.b[0];
   src_end = src + 20;
   
-  message->message = lf_realloc (message->message,
+  message->message = sn_realloc (message->message,
                                  message->allocated + 20);
   dest = message->message + message->allocated;
   message->allocated += 20;
@@ -348,7 +348,7 @@ add_event_to_messages (LfDisplay *display,
   if (completed)
     {
       /* Pull message out of the pending queue and return it */
-      lf_list_remove (pending_messages, message);
+      sn_list_remove (pending_messages, message);
       return message;
     }
   else
@@ -357,15 +357,15 @@ add_event_to_messages (LfDisplay *display,
 
 typedef struct
 {
-  LfDisplay *display;
-  LfXmessage *message;
+  SnDisplay *display;
+  SnXmessage *message;
 } MessageDispatchData;
 
-static lf_bool_t
+static sn_bool_t
 dispatch_message_foreach (void *value,
                           void *data)
 {
-  LfXmessageHandler *handler = value;
+  SnXmessageHandler *handler = value;
   MessageDispatchData *mdd = data;  
 
   (* handler->func) (mdd->display,
@@ -376,12 +376,12 @@ dispatch_message_foreach (void *value,
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_xmessage_process_event (LfDisplay *display,
+sn_bool_t
+sn_internal_xmessage_process_event (SnDisplay *display,
                                     XEvent    *xevent)
 {
-  lf_bool_t retval;
-  LfXmessage *message;
+  sn_bool_t retval;
+  SnXmessage *message;
 
   retval = FALSE;
   message = NULL;
@@ -404,7 +404,7 @@ lf_internal_xmessage_process_event (LfDisplay *display,
        * messages containing invalid UTF-8
        */
 
-      if (lf_internal_utf8_validate (message->message, -1))
+      if (sn_internal_utf8_validate (message->message, -1))
         {
           MessageDispatchData mdd;
           
@@ -416,13 +416,13 @@ lf_internal_xmessage_process_event (LfDisplay *display,
            * dispatch
            */
           if (xmessage_funcs != NULL)
-            lf_list_foreach (xmessage_funcs,
+            sn_list_foreach (xmessage_funcs,
                              dispatch_message_foreach,
                              &mdd);
         }
 
-      lf_free (message->message);
-      lf_free (message);
+      sn_free (message->message);
+      sn_free (message);
     }
   
   return retval;
@@ -438,7 +438,7 @@ append_to_string (char      **append_to,
   
   len = strlen (append);
 
-  *append_to = lf_realloc (*append_to, *current_len + len + 1);
+  *append_to = sn_realloc (*append_to, *current_len + len + 1);
   
   end = *append_to + *current_len;
   strcpy (end, append);
@@ -477,11 +477,11 @@ append_to_string_escaped (char      **append_to,
 
   append_to_string (append_to, current_len, escaped);
 
-  lf_free (escaped);
+  sn_free (escaped);
 }
 
 char*
-lf_internal_serialize_message (const char   *prefix,
+sn_internal_serialize_message (const char   *prefix,
                                const char  **property_names,
                                const char  **property_values)
 {
@@ -515,8 +515,8 @@ append_string_to_list (char     ***list,
 {
   if (*list == NULL)
     {
-      *list = lf_new0 (char*, 2);
-      (*list)[0] = lf_internal_strdup (append);
+      *list = sn_new0 (char*, 2);
+      (*list)[0] = sn_internal_strdup (append);
     }
   else
     {
@@ -526,8 +526,8 @@ append_string_to_list (char     ***list,
       while ((*list)[i] != NULL)
         ++i;
 
-      *list = lf_renew (char*, *list, i + 2);
-      (*list)[i] = lf_internal_strdup (append);
+      *list = sn_renew (char*, *list, i + 2);
+      (*list)[i] = sn_internal_strdup (append);
       (*list)[i+1] = NULL;
     }
 }
@@ -552,7 +552,7 @@ parse_prefix_up_to (const char *str,
     return NULL;
 
   len = p - str;
-  prefix = lf_internal_strndup (str, len);
+  prefix = sn_internal_strndup (str, len);
 
   *end = str + len;
 
@@ -571,7 +571,7 @@ parse_prefix_up_to (const char *str,
  *  copyright Red Hat Inc. also)
  */
 
-static lf_bool_t
+static sn_bool_t
 unquote_string_inplace (char  *str,
                         char **end)
 {
@@ -675,13 +675,13 @@ unquote_string_inplace (char  *str,
   return FALSE;
 }
 
-static lf_bool_t
+static sn_bool_t
 unescape_string_inplace (char  *str,
                          char **end)
 {
   char* dest;
   char* s;
-  lf_bool_t escaped;
+  sn_bool_t escaped;
   
   dest = s = str;
   escaped = FALSE;
@@ -717,7 +717,7 @@ unescape_string_inplace (char  *str,
   return TRUE;
 }
 
-static lf_bool_t
+static sn_bool_t
 parse_property (const char  *str,
                 char       **name_p,
                 char       **val_p,
@@ -730,7 +730,7 @@ parse_property (const char  *str,
   
   *end_p = NULL;
 
-  copy = lf_internal_strdup (str);
+  copy = sn_internal_strdup (str);
   p = copy;
   
   while (*p == ' ')
@@ -739,7 +739,7 @@ parse_property (const char  *str,
   name = parse_prefix_up_to (p, '=', (const char**) &p);
   if (name == NULL)
     {
-      lf_free (copy);
+      sn_free (copy);
       return FALSE;
     }
   ++p; /* skip '=' */
@@ -755,11 +755,11 @@ parse_property (const char  *str,
       end = NULL;
       if (!unquote_string_inplace (p, &end))
         {
-          lf_free (copy);
+          sn_free (copy);
           return FALSE;
         }
 
-      val = lf_internal_strndup (p, end - p);
+      val = sn_internal_strndup (p, end - p);
 
       p = end;
     }
@@ -770,11 +770,11 @@ parse_property (const char  *str,
       end = NULL;
       if (!unescape_string_inplace (p, &end))
         {
-          lf_free (copy);
+          sn_free (copy);
           return FALSE;
         }
 
-      val = lf_internal_strndup (p, end - p);
+      val = sn_internal_strndup (p, end - p);
 
       p = end;
     }
@@ -784,7 +784,7 @@ parse_property (const char  *str,
 
   *end_p = str + (p - copy);
 
-  lf_free (copy);
+  sn_free (copy);
 
   *name_p = name;
   *val_p = val;
@@ -792,8 +792,8 @@ parse_property (const char  *str,
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_unserialize_message (const char *message,
+sn_bool_t
+sn_internal_unserialize_message (const char *message,
                                  char      **prefix_p,
                                  char     ***property_names,
                                  char     ***property_values)

@@ -1,4 +1,4 @@
-AC_INIT(liblf/lf-launchee.c)
+AC_INIT(libsn/sn-launchee.c)
 
 AM_CONFIG_HEADER(config.h)
 
@@ -34,11 +34,11 @@ fi
 dnl (check from glib)
 dnl ok, here we try to check whether the systems prototypes for
 dnl malloc and friends actually match the prototypes provided
-dnl by lf-common.h (keep in sync). i currently only know how to check
+dnl by sn-common.h (keep in sync). i currently only know how to check
 dnl this reliably with gcc (-Werror), improvements for other
 dnl compilers are appreciated.
 SANE_MALLOC_PROTOS=no
-AC_MSG_CHECKING([if malloc() and friends prototypes are lf-util.h compatible])
+AC_MSG_CHECKING([if malloc() and friends prototypes are sn-util.h compatible])
 lf_save_CFLAGS=$CFLAGS
 if test "x$GCC" = "xyes"; then
   CFLAGS="$CFLAGS -Werror"
@@ -83,7 +83,7 @@ AC_SUBST(LIBLF_LIBS)
 
 AC_OUTPUT([
 Makefile
-liblf/Makefile
+libsn/Makefile
 test/Makefile
-liblf-1.0.pc
+libsn-1.0.pc
 ])

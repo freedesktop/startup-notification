@@ -22,129 +22,129 @@
  * SOFTWARE.
  */
 
-#include "lf-internals.h"
+#include "sn-internals.h"
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
 Atom
-lf_internal_atom_get (LfDisplay  *display,
+sn_internal_atom_get (SnDisplay  *display,
                       const char *atom_name)
 {
-  return XInternAtom (lf_display_get_x_display (display),
+  return XInternAtom (sn_display_get_x_display (display),
                       atom_name,
                       False);
 }
 
 void
-lf_internal_set_utf8_string (LfDisplay  *display,
+sn_internal_set_utf8_string (SnDisplay  *display,
                              Window      xwindow,
                              const char *property,
                              const char *str)
 {
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
-                   lf_internal_atom_get (display, "UTF8_STRING"),
+                   sn_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, "UTF8_STRING"),
                    8, PropModeReplace, (unsigned char*) str,
                    strlen (str));
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
 void
-lf_internal_set_string (LfDisplay  *display,
+sn_internal_set_string (SnDisplay  *display,
                         Window      xwindow,
                         const char *property,
                         const char *str)
 {
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, property),
                    XA_STRING,
                    8, PropModeReplace, (unsigned char*) str,
                    strlen (str));
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
 void
-lf_internal_set_cardinal (LfDisplay  *display,
+sn_internal_set_cardinal (SnDisplay  *display,
                           Window      xwindow,
                           const char *property,
                           int         val)
 {
   unsigned long long_val = val;
 
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, property),
                    XA_CARDINAL,
                    32, PropModeReplace, (unsigned char*) &long_val, 1);
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
 void
-lf_internal_set_window (LfDisplay  *display,
+sn_internal_set_window (SnDisplay  *display,
                         Window      xwindow,
                         const char *property,
                         Window      val)
 {
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, property),
                    XA_WINDOW,
                    32, PropModeReplace, (unsigned char*) &val, 1);
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
 void
-lf_internal_set_cardinal_list (LfDisplay  *display,
+sn_internal_set_cardinal_list (SnDisplay  *display,
                                Window      xwindow,
                                const char *property,
                                int        *vals,
                                int         n_vals)
 {
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, property),
                    XA_CARDINAL,
                    32, PropModeReplace, (unsigned char*) vals, n_vals);
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
 void
-lf_internal_set_atom_list (LfDisplay  *display,
+sn_internal_set_atom_list (SnDisplay  *display,
                            Window      xwindow,
                            const char *property,
                            Atom       *vals,
                            int         n_vals)
 {
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
 
-  XChangeProperty (lf_display_get_x_display (display),
+  XChangeProperty (sn_display_get_x_display (display),
                    xwindow,
-                   lf_internal_atom_get (display, property),
+                   sn_internal_atom_get (display, property),
                    XA_ATOM,
                    32, PropModeReplace, (unsigned char*) vals, n_vals);
 
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
 }
 
-lf_bool_t
-lf_internal_get_cardinal (LfDisplay  *display,
+sn_bool_t
+sn_internal_get_cardinal (SnDisplay  *display,
                           Window      xwindow,
                           const char *property,
                           int        *val)
@@ -158,16 +158,16 @@ lf_internal_get_cardinal (LfDisplay  *display,
 
   *val = 0;
 
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
   num = NULL;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 256, /* 256 = random number */
 			       False, XA_CARDINAL, &type, &format, &nitems,
 			       &bytes_after, (unsigned char **)&num);
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || num == NULL || nitems == 0)
     {
       if (num)
@@ -187,8 +187,8 @@ lf_internal_get_cardinal (LfDisplay  *display,
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_get_utf8_string (LfDisplay   *display,
+sn_bool_t
+sn_internal_get_utf8_string (SnDisplay   *display,
                              Window       xwindow,
                              const char  *property,
                              char       **val)
@@ -201,22 +201,22 @@ lf_internal_get_utf8_string (LfDisplay   *display,
   int result;
   Atom utf8_string;
 
-  utf8_string = lf_internal_atom_get (display, "UTF8_STRING");
+  utf8_string = sn_internal_atom_get (display, "UTF8_STRING");
 
   *val = NULL;
 
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
   str = NULL;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 20000, /* 20000 = random number */
 			       False,
                                utf8_string,
                                &type, &format, &nitems,
 			       &bytes_after, (unsigned char **)&str);
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || str == NULL)
     {
       if (str)
@@ -232,7 +232,7 @@ lf_internal_get_utf8_string (LfDisplay   *display,
       return FALSE;
     }
 
-  if (!lf_internal_utf8_validate (str, nitems))
+  if (!sn_internal_utf8_validate (str, nitems))
     {
       fprintf (stderr, "Warning: invalid UTF-8 in property %s on window 0x%lx\n",
                property, xwindow);
@@ -240,14 +240,14 @@ lf_internal_get_utf8_string (LfDisplay   *display,
       return FALSE;
     }
   
-  *val = lf_internal_strdup (str);
+  *val = sn_internal_strdup (str);
   XFree (str);
 
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_get_string (LfDisplay   *display,
+sn_bool_t
+sn_internal_get_string (SnDisplay   *display,
                         Window       xwindow,
                         const char  *property,
                         char       **val)
@@ -261,18 +261,18 @@ lf_internal_get_string (LfDisplay   *display,
 
   *val = NULL;
 
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
   str = NULL;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 20000, /* 20000 = random number */
 			       False,
                                XA_STRING,
                                &type, &format, &nitems,
 			       &bytes_after, (unsigned char **)&str);
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || str == NULL)
     {
       if (str)
@@ -288,14 +288,14 @@ lf_internal_get_string (LfDisplay   *display,
       return FALSE;
     }
   
-  *val = lf_internal_strdup (str);
+  *val = sn_internal_strdup (str);
   XFree (str);
 
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_get_window (LfDisplay   *display,
+sn_bool_t
+sn_internal_get_window (SnDisplay   *display,
                         Window       xwindow,
                         const char  *property,
                         Window      *val)
@@ -309,16 +309,16 @@ lf_internal_get_window (LfDisplay   *display,
 
   *val = 0;
 
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
   win = NULL;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 256, /* 256 = random number */
 			       False, XA_WINDOW, &type, &format, &nitems,
 			       &bytes_after, (unsigned char **)&win);
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || win == NULL || nitems == 0)
     {
       if (win)
@@ -338,8 +338,8 @@ lf_internal_get_window (LfDisplay   *display,
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_get_atom_list (LfDisplay   *display,
+sn_bool_t
+sn_internal_get_atom_list (SnDisplay   *display,
                            Window       xwindow,
                            const char  *property,
                            Atom       **atoms,
@@ -356,15 +356,15 @@ lf_internal_get_atom_list (LfDisplay   *display,
   *n_atoms = 0;
   data = NULL;
   
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 1000, /* 1000 = random number */
 			       False, XA_ATOM, &type, &format, &nitems,
                                &bytes_after, (unsigned char **)&data);  
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || data == NULL)
     {
       if (data)
@@ -378,7 +378,7 @@ lf_internal_get_atom_list (LfDisplay   *display,
       return FALSE;
     }
 
-  *atoms = lf_new (Atom, nitems);
+  *atoms = sn_new (Atom, nitems);
   memcpy (*atoms, data, sizeof (Atom) * nitems);
   *n_atoms = nitems;
   
@@ -387,8 +387,8 @@ lf_internal_get_atom_list (LfDisplay   *display,
   return TRUE;
 }
 
-lf_bool_t
-lf_internal_get_cardinal_list (LfDisplay   *display,
+sn_bool_t
+sn_internal_get_cardinal_list (SnDisplay   *display,
                                Window       xwindow,
                                const char  *property,
                                int        **vals,
@@ -406,15 +406,15 @@ lf_internal_get_cardinal_list (LfDisplay   *display,
   *n_vals = 0;
   nums = NULL;
   
-  lf_display_error_trap_push (display);
+  sn_display_error_trap_push (display);
   type = None;
-  result = XGetWindowProperty (lf_display_get_x_display (display),
+  result = XGetWindowProperty (sn_display_get_x_display (display),
 			       xwindow,
-                               lf_internal_atom_get (display, property),
+                               sn_internal_atom_get (display, property),
 			       0, 1000, /* 1000 = random number */
 			       False, XA_CARDINAL, &type, &format, &nitems,
 			       &bytes_after, (unsigned char **)&nums);  
-  lf_display_error_trap_pop (display);
+  sn_display_error_trap_pop (display);
   if (result != Success || nums == NULL)
     {
       if (nums)
@@ -428,7 +428,7 @@ lf_internal_get_cardinal_list (LfDisplay   *display,
       return FALSE;
     }
 
-  *vals = lf_new (int, nitems);
+  *vals = sn_new (int, nitems);
   *n_vals = nitems;
   i = 0;
   while (i < *n_vals)
@@ -443,17 +443,17 @@ lf_internal_get_cardinal_list (LfDisplay   *display,
 }
 
 void
-lf_internal_send_event_all_screens (LfDisplay    *display,
+sn_internal_send_event_all_screens (SnDisplay    *display,
                                     unsigned long mask,
                                     XEvent       *xevent)
 {
   int i;
   Display *xdisplay;
 
-  xdisplay = lf_display_get_x_display (display);
+  xdisplay = sn_display_get_x_display (display);
   
   i = 0;
-  while (lf_display_get_x_screen (display, i) != NULL)
+  while (sn_display_get_x_screen (display, i) != NULL)
     {
       XSendEvent (xdisplay,
                   RootWindow (xdisplay, i),

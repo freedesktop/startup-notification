@@ -22,39 +22,39 @@
  * SOFTWARE.
  */
 
-#ifndef __LF_XMESSAGES_H__
-#define __LF_XMESSAGES_H__
+#ifndef __SN_XMESSAGES_H__
+#define __SN_XMESSAGES_H__
 
-#include <liblf/lf-common.h>
+#include <libsn/sn-common.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-typedef void (* LfXmessageFunc) (LfDisplay       *display,
+typedef void (* SnXmessageFunc) (SnDisplay       *display,
                                  const char      *message_type,
                                  const char      *message,
                                  void            *user_data);
 
-void lf_internal_add_xmessage_func    (LfDisplay      *display,
+void sn_internal_add_xmessage_func    (SnDisplay      *display,
                                        const char     *message_type,
-                                       LfXmessageFunc  func,
+                                       SnXmessageFunc  func,
                                        void           *func_data,
-                                       LfFreeFunc      free_data_func);
-void lf_internal_remove_xmessage_func (LfDisplay      *display,
+                                       SnFreeFunc      free_data_func);
+void sn_internal_remove_xmessage_func (SnDisplay      *display,
                                        const char     *message_type,
-                                       LfXmessageFunc  func,
+                                       SnXmessageFunc  func,
                                        void           *func_data);
-void lf_internal_broadcast_xmessage   (LfDisplay      *display,
+void sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                        const char     *message_type,
                                        const char     *message);
 
-char*     lf_internal_serialize_message   (const char   *prefix,
+char*     sn_internal_serialize_message   (const char   *prefix,
                                            const char  **property_names,
                                            const char  **property_values);
-lf_bool_t lf_internal_unserialize_message (const char   *message,
+sn_bool_t sn_internal_unserialize_message (const char   *message,
                                            char        **prefix,
                                            char       ***property_names,
                                            char       ***property_values);
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_XMESSAGES_H__ */
+#endif /* __SN_XMESSAGES_H__ */

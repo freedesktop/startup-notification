@@ -1,3 +1,8 @@
+2002-10-20  Havoc Pennington  <hp@pobox.com>
+
+	* Massively rename everything from liblf to libsn, and reimport
+	to CVS.
+
 2002-09-20  Havoc Pennington  <hp@pobox.com>
 
 	* liblf/lf-monitor.c: implement support for xmessage-based

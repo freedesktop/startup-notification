@@ -9,7 +9,7 @@ cd $srcdir
 
 PROJECT=launchfeedback
 TEST_TYPE=-f
-FILE=liblf-1.0.pc.in
+FILE=libsn-1.0.pc.in
 
 DIE=0
 

@@ -23,14 +23,14 @@
  */
 
 #include <config.h>
-#include <liblf/lf.h>
-#include <liblf/lf-xmessages.h>
-#include <liblf/lf-internals.h>
+#include <libsn/sn.h>
+#include <libsn/sn-xmessages.h>
+#include <libsn/sn-internals.h>
 
 #include "test-boilerplate.h"
 
 static void
-message_func (LfDisplay       *display,
+message_func (SnDisplay       *display,
               const char      *message_type,
               const char      *message,
               void            *user_data)
@@ -49,7 +49,7 @@ message_func (LfDisplay       *display,
   names = NULL;
   values = NULL;
 
-  if (lf_internal_unserialize_message (message,
+  if (sn_internal_unserialize_message (message,
                                        &prefix, &names, &values))
     {
       printf (" %s:\n", prefix);
@@ -62,8 +62,8 @@ message_func (LfDisplay       *display,
           ++i;
         }
 
-      lf_internal_strfreev (names);
-      lf_internal_strfreev (values);
+      sn_internal_strfreev (names);
+      sn_internal_strfreev (values);
     }
 }
 
@@ -71,7 +71,7 @@ int
 main (int argc, char **argv)
 {
   Display *xdisplay;
-  LfDisplay *display;
+  SnDisplay *display;
 
   if (argc != 2)
     {
@@ -86,7 +86,7 @@ main (int argc, char **argv)
       return 1;
     }
 
-  if (getenv ("LIBLF_SYNC") != NULL)
+  if (getenv ("LIBSN_SYNC") != NULL)
     XSynchronize (xdisplay, True);
   
   XSetErrorHandler (x_error_handler);
@@ -96,11 +96,11 @@ main (int argc, char **argv)
   XSelectInput (xdisplay, DefaultRootWindow (xdisplay),
                 PropertyChangeMask);
   
-  display = lf_display_new (xdisplay,
+  display = sn_display_new (xdisplay,
                             error_trap_push,
                             error_trap_pop);
 
-  lf_internal_add_xmessage_func (display,
+  sn_internal_add_xmessage_func (display,
                                  argv[1],
                                  message_func,
                                  NULL, NULL);
@@ -111,7 +111,7 @@ main (int argc, char **argv)
 
       XNextEvent (xdisplay, &xevent);
 
-      lf_display_process_event (display, &xevent);
+      sn_display_process_event (display, &xevent);
     }
   
   return 0;

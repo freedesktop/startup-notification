@@ -23,19 +23,19 @@
  */
 
 
-#ifndef __LF_INTERNALS_H__
-#define __LF_INTERNALS_H__
+#ifndef __SN_INTERNALS_H__
+#define __SN_INTERNALS_H__
 
-#include <liblf/lf-common.h>
+#include <libsn/sn-common.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <liblf/lf-list.h>
-#include <liblf/lf-xutils.h>
+#include <libsn/sn-list.h>
+#include <libsn/sn-xutils.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
 #ifndef TRUE
 #define TRUE 1
@@ -49,28 +49,28 @@ LF_BEGIN_DECLS
 #define NULL ((void*) 0)
 #endif
 
-/* --- From lf-launcher.c --- */
-lf_bool_t lf_internal_launcher_process_event (LfDisplay *display,
+/* --- From sn-launcher.c --- */
+sn_bool_t sn_internal_launcher_process_event (SnDisplay *display,
                                               XEvent    *xevent);
 
-/* --- From lf-monitor.c --- */
-lf_bool_t lf_internal_monitor_process_event (LfDisplay *display,
+/* --- From sn-monitor.c --- */
+sn_bool_t sn_internal_monitor_process_event (SnDisplay *display,
                                              XEvent    *xevent);
 
-/* --- From lf-util.c --- */
-lf_bool_t lf_internal_utf8_validate (const char *str,
+/* --- From sn-util.c --- */
+sn_bool_t sn_internal_utf8_validate (const char *str,
                                      int         max_len);
-char*     lf_internal_strdup        (const char *str);
-char*     lf_internal_strndup       (const char *str,
+char*     sn_internal_strdup        (const char *str);
+char*     sn_internal_strndup       (const char *str,
                                      int         n);
-void      lf_internal_strfreev      (char      **strings);
+void      sn_internal_strfreev      (char      **strings);
 
-unsigned long lf_internal_string_to_ulong (const char* str);
+unsigned long sn_internal_string_to_ulong (const char* str);
 
-/* --- From lf-xmessages.c --- */
-lf_bool_t lf_internal_xmessage_process_event (LfDisplay *display,
+/* --- From sn-xmessages.c --- */
+sn_bool_t sn_internal_xmessage_process_event (SnDisplay *display,
                                               XEvent    *xevent);
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_INTERNALS_H__ */
+#endif /* __SN_INTERNALS_H__ */

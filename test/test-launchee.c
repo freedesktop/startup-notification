@@ -23,7 +23,7 @@
  */
 
 #include <config.h>
-#include <liblf/lf.h>
+#include <libsn/sn.h>
 
 #include "test-boilerplate.h"
 
@@ -31,8 +31,8 @@ int
 main (int argc, char **argv)
 {
   Display *xdisplay;
-  LfDisplay *display;
-  LfLauncheeContext *context;
+  SnDisplay *display;
+  SnLauncheeContext *context;
   int i;
   
   xdisplay = XOpenDisplay (NULL);
@@ -42,16 +42,16 @@ main (int argc, char **argv)
       return 1;
     }
 
-  if (getenv ("LIBLF_SYNC") != NULL)
+  if (getenv ("LIBSN_SYNC") != NULL)
     XSynchronize (xdisplay, True);
   
   XSetErrorHandler (x_error_handler);
   
-  display = lf_display_new (xdisplay,
+  display = sn_display_new (xdisplay,
                             error_trap_push,
                             error_trap_pop);
 
-  context = lf_launchee_context_new_from_environment (display);
+  context = sn_launchee_context_new_from_environment (display);
 
   if (context == NULL)
     {
@@ -60,20 +60,20 @@ main (int argc, char **argv)
     }
 
   printf ("Launchee started with window 0x%lx ID \"%s\"\n",
-          lf_launchee_context_get_launch_window (context),
-          lf_launchee_context_get_launch_id (context));
+          sn_launchee_context_get_launch_window (context),
+          sn_launchee_context_get_launch_id (context));
 
   /* simulate startup time */
   i = 0;
   while (i < 4)
     {
       sleep (1);
-      lf_launchee_context_pulse (context);
+      sn_launchee_context_pulse (context);
       ++i;
     }
 
   printf ("Launchee startup complete\n");
-  lf_launchee_context_complete (context);
+  sn_launchee_context_complete (context);
   
   while (TRUE)
     {
@@ -81,7 +81,7 @@ main (int argc, char **argv)
 
       XNextEvent (xdisplay, &xevent);
 
-      lf_display_process_event (display, &xevent);
+      sn_display_process_event (display, &xevent);
     }
   
   return 0;

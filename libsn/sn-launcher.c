@@ -21,24 +21,24 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "lf-launcher.h"
-#include "lf-internals.h"
+#include "sn-launcher.h"
+#include "sn-internals.h"
 
 #include <sys/types.h>
 #include <unistd.h>
 
-static LfList* context_list = NULL;
+static SnList* context_list = NULL;
 
-struct LfLauncherContext
+struct SnLauncherContext
 {
   int                 refcount;
-  LfDisplay          *display;
-  LfLauncherEventFunc event_func;
+  SnDisplay          *display;
+  SnLauncherEventFunc event_func;
   void               *event_func_data;
-  LfFreeFunc          free_data_func;
+  SnFreeFunc          free_data_func;
   char               *launch_id;
   Window              launch_window;
-  LfLaunchType        type;
+  SnLaunchType        type;
   Window              geometry_window;
   char               *name;
   char               *description;
@@ -57,8 +57,8 @@ struct LfLauncherContext
 };
 
 /**
- * lf_launcher_context_new:
- * @display: an #LfDisplay
+ * sn_launcher_context_new:
+ * @display: an #SnDisplay
  * @event_func: function to be called when a notable event occurs
  * @event_func_data: data to pass to @event_func
  * @free_data_func: function to be called on @event_func_data when freeing the context
@@ -68,82 +68,82 @@ struct LfLauncherContext
  * create a launcher context when the user double-clicks on
  * an application icon.
  *
- * Return value: a new #LfLauncherContext
+ * Return value: a new #SnLauncherContext
  **/
-LfLauncherContext*
-lf_launcher_context_new (LfDisplay           *display,
-                         LfLauncherEventFunc  event_func,
+SnLauncherContext*
+sn_launcher_context_new (SnDisplay           *display,
+                         SnLauncherEventFunc  event_func,
                          void                *event_func_data,
-                         LfFreeFunc           free_data_func)
+                         SnFreeFunc           free_data_func)
 {
-  LfLauncherContext *context;
+  SnLauncherContext *context;
 
   if (context_list == NULL)
-    context_list = lf_list_new ();
+    context_list = sn_list_new ();
 
-  context = lf_new0 (LfLauncherContext, 1);
+  context = sn_new0 (SnLauncherContext, 1);
 
   context->refcount = 1;
   context->display = display;
-  lf_display_ref (context->display);
+  sn_display_ref (context->display);
   context->event_func = event_func;
   context->event_func_data = event_func_data;
   context->free_data_func = free_data_func;
 
   context->workspace = -1;
   context->pid = -1;
-  context->type = LF_LAUNCH_TYPE_OTHER;
+  context->type = SN_LAUNCH_TYPE_OTHER;
   
-  lf_list_prepend (context_list, context);
+  sn_list_prepend (context_list, context);
 
   return context;
 }
 
 /**
- * lf_launcher_context_ref:
- * @context: a #LfLauncherContext
+ * sn_launcher_context_ref:
+ * @context: a #SnLauncherContext
  *
  * Increments the reference count of @context
  **/
 void
-lf_launcher_context_ref (LfLauncherContext *context)
+sn_launcher_context_ref (SnLauncherContext *context)
 {
   context->refcount += 1;
 }
 
 /**
- * lf_launcher_context_unref:
- * @context: a #LfLauncherContext
+ * sn_launcher_context_unref:
+ * @context: a #SnLauncherContext
  *
  * Decrements the reference count of @context and frees the
  * context if the count reaches zero.
  **/
 void
-lf_launcher_context_unref (LfLauncherContext *context)
+sn_launcher_context_unref (SnLauncherContext *context)
 {
   context->refcount -= 1;
 
   if (context->refcount == 0)
     {
-      lf_list_remove (context_list, context);
+      sn_list_remove (context_list, context);
 
       if (context->free_data_func)
         (* context->free_data_func) (context->event_func_data);
 
-      lf_free (context->launch_id);
+      sn_free (context->launch_id);
       
       if (context->launch_window != None)
         {
-          lf_display_error_trap_push (context->display);
+          sn_display_error_trap_push (context->display);
 
-          XDestroyWindow (lf_display_get_x_display (context->display),
+          XDestroyWindow (sn_display_get_x_display (context->display),
                           context->launch_window);
 
-          lf_display_error_trap_pop (context->display);
+          sn_display_error_trap_pop (context->display);
         }
 
-      lf_display_unref (context->display);
-      lf_free (context);
+      sn_display_unref (context->display);
+      sn_free (context);
     }
 }
 
@@ -153,7 +153,7 @@ strip_slashes (const char *src)
   char *canonicalized_name;
   char *s;
   
-  canonicalized_name = lf_internal_strdup (src);
+  canonicalized_name = sn_internal_strdup (src);
 
   s = canonicalized_name;
   while (*s)
@@ -167,8 +167,8 @@ strip_slashes (const char *src)
 }
 
 /**
- * lf_launcher_context_initiate:
- * @context: an #LfLaunchContext
+ * sn_launcher_context_initiate:
+ * @context: an #SnLaunchContext
  * @launcher_name: name of the launcher app, suitable for debug output
  * @launchee_name: name of the launchee app, suitable for debug output
  * @timestamp: X timestamp of event causing the launch
@@ -178,13 +178,13 @@ strip_slashes (const char *src)
  * initiating the sequence.
  **/
 void
-lf_launcher_context_initiate (LfLauncherContext *context,
+sn_launcher_context_initiate (SnLauncherContext *context,
                               const char        *launcher_name,
                               const char        *launchee_name,
                               Time               timestamp)
 {
   static int sequence_number = 0;
-  static lf_bool_t have_hostname = FALSE;
+  static sn_bool_t have_hostname = FALSE;
   static char hostbuf[257];
   char *s;
   int len;
@@ -195,7 +195,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
   
   if (context->launch_id != NULL)
     {
-      fprintf (stderr, "%s called twice for the same LfLaunchContext\n",
+      fprintf (stderr, "%s called twice for the same SnLaunchContext\n",
                __FUNCTION__);
       return;
     }
@@ -215,18 +215,18 @@ lf_launcher_context_initiate (LfLauncherContext *context,
   len = strlen (launcher_name) + strlen (launchee_name) +
     256; /* 256 is longer than a couple %d and some slashes */
   
-  s = lf_malloc (len + 3);
+  s = sn_malloc (len + 3);
   snprintf (s, len, "%s/%s/%lu/%d-%d-%s",
             canonicalized_launcher, canonicalized_launchee, (unsigned long) timestamp,
             (int) getpid (), (int) sequence_number, hostbuf);
   ++sequence_number;
 
-  lf_free (canonicalized_launcher);
-  lf_free (canonicalized_launchee);
+  sn_free (canonicalized_launcher);
+  sn_free (canonicalized_launchee);
   
   context->launch_id = s;
 
-  xdisplay = lf_display_get_x_display (context->display);
+  xdisplay = sn_display_get_x_display (context->display);
 
   {
     XSetWindowAttributes attrs;
@@ -249,43 +249,43 @@ lf_launcher_context_initiate (LfLauncherContext *context,
   /* push outer error to allow avoiding XSync after every
    * property set
    */
-  lf_display_error_trap_push (context->display);
+  sn_display_error_trap_push (context->display);
   
-  lf_internal_set_string (context->display,
+  sn_internal_set_string (context->display,
                           context->launch_window,
                           "_NET_LAUNCH_ID",
                           context->launch_id);
 
-  lf_internal_set_string (context->display,
+  sn_internal_set_string (context->display,
                           context->launch_window,
                           "_NET_LAUNCH_HOSTNAME",
                           hostbuf);
 
   switch (context->type)
     {
-    case LF_LAUNCH_TYPE_OTHER:
-      atoms[0] = lf_internal_atom_get (context->display,
+    case SN_LAUNCH_TYPE_OTHER:
+      atoms[0] = sn_internal_atom_get (context->display,
                                        "_NET_LAUNCH_TYPE_OTHER");
       break;
-    case LF_LAUNCH_TYPE_DOCK_ICON:
-      atoms[0] = lf_internal_atom_get (context->display,
+    case SN_LAUNCH_TYPE_DOCK_ICON:
+      atoms[0] = sn_internal_atom_get (context->display,
                                        "_NET_LAUNCH_TYPE_DOCK_ICON");
       break;
-    case LF_LAUNCH_TYPE_DESKTOP_ICON:
-      atoms[0] = lf_internal_atom_get (context->display,
+    case SN_LAUNCH_TYPE_DESKTOP_ICON:
+      atoms[0] = sn_internal_atom_get (context->display,
                                        "_NET_LAUNCH_TYPE_DESKTOP_ICON");
       break;
-    case LF_LAUNCH_TYPE_MENU:
-      atoms[0] = lf_internal_atom_get (context->display,
+    case SN_LAUNCH_TYPE_MENU:
+      atoms[0] = sn_internal_atom_get (context->display,
                                        "_NET_LAUNCH_TYPE_MENU");
       break;
-    case LF_LAUNCH_TYPE_KEY_SHORTCUT:
-      atoms[0] = lf_internal_atom_get (context->display,
+    case SN_LAUNCH_TYPE_KEY_SHORTCUT:
+      atoms[0] = sn_internal_atom_get (context->display,
                                        "_NET_LAUNCH_TYPE_KEY_SHORTCUT");
       break;
     }
 
-  lf_internal_set_atom_list (context->display,
+  sn_internal_set_atom_list (context->display,
                              context->launch_window,
                              "_NET_LAUNCH_TYPE",
                              atoms, 1);
@@ -299,7 +299,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
       cardinals[2] = context->width;
       cardinals[3] = context->height;
       
-      lf_internal_set_cardinal_list (context->display,
+      sn_internal_set_cardinal_list (context->display,
                                      context->launch_window,
                                      "_NET_LAUNCH_GEOMETRY",
                                      cardinals, 4);
@@ -307,7 +307,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->geometry_window != None)
     {
-      lf_internal_set_window (context->display,
+      sn_internal_set_window (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_GEOMETRY_WINDOW",
                               context->geometry_window);
@@ -315,7 +315,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->supports_cancel)
     {
-      lf_internal_set_cardinal (context->display,
+      sn_internal_set_cardinal (context->display,
                                 context->launch_window,
                                 "_NET_LAUNCH_SUPPORTS_CANCEL",
                                 context->supports_cancel);
@@ -323,7 +323,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->name)
     {
-      lf_internal_set_utf8_string (context->display,
+      sn_internal_set_utf8_string (context->display,
                                    context->launch_window,
                                    "_NET_LAUNCH_NAME",
                                    context->name);
@@ -331,7 +331,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->description)
     {
-      lf_internal_set_utf8_string (context->display,
+      sn_internal_set_utf8_string (context->display,
                                    context->launch_window,
                                    "_NET_LAUNCH_DESCRIPTION",
                                    context->description);
@@ -339,7 +339,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->workspace >= 0)
     {
-      lf_internal_set_cardinal (context->display,
+      sn_internal_set_cardinal (context->display,
                                 context->launch_window,
                                 "_NET_LAUNCH_DESKTOP",
                                 context->workspace);
@@ -347,7 +347,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->pid >= 0)
     {
-      lf_internal_set_cardinal (context->display,
+      sn_internal_set_cardinal (context->display,
                                 context->launch_window,
                                 "_NET_LAUNCH_PID",
                                 context->pid);
@@ -355,7 +355,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
   
   if (context->binary_name)
     {
-      lf_internal_set_string (context->display,
+      sn_internal_set_string (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_BINARY_NAME",
                               context->binary_name);
@@ -363,7 +363,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->icon_name)
     {
-      lf_internal_set_string (context->display,
+      sn_internal_set_string (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_ICON_NAME",
                               context->icon_name);
@@ -371,7 +371,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->resource_class)
     {
-      lf_internal_set_string (context->display,
+      sn_internal_set_string (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_LEGACY_RESOURCE_CLASS",
                               context->resource_class);
@@ -379,7 +379,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->resource_name)
     {
-      lf_internal_set_string (context->display,
+      sn_internal_set_string (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_LEGACY_RESOURCE_NAME",
                               context->resource_name);
@@ -387,13 +387,13 @@ lf_launcher_context_initiate (LfLauncherContext *context,
 
   if (context->window_title)
     {
-      lf_internal_set_string (context->display,
+      sn_internal_set_string (context->display,
                               context->launch_window,
                               "_NET_LAUNCH_LEGACY_NAME",
                               context->window_title);
     }
   
-  lf_display_error_trap_pop (context->display);
+  sn_display_error_trap_pop (context->display);
   
   /* Sync to server (so the launch window ID exists for example) */
   XFlush (xdisplay);
@@ -407,7 +407,7 @@ lf_launcher_context_initiate (LfLauncherContext *context,
     xev.xclient.send_event = True;
     xev.xclient.display = xdisplay;
     xev.xclient.window = context->launch_window;
-    xev.xclient.message_type = lf_internal_atom_get (context->display,
+    xev.xclient.message_type = sn_internal_atom_get (context->display,
                                                      "_NET_LAUNCH_INITIATE");
     xev.xclient.format = 32;
     xev.xclient.data.l[0] = timestamp;
@@ -415,87 +415,87 @@ lf_launcher_context_initiate (LfLauncherContext *context,
     xev.xclient.data.l[2] = 0;
     xev.xclient.data.l[3] = 0;
     
-    lf_internal_send_event_all_screens (context->display,
+    sn_internal_send_event_all_screens (context->display,
                                         PropertyChangeMask,
                                         &xev);
   }
 }
 
 Window
-lf_launcher_context_get_launch_window (LfLauncherContext *context)
+sn_launcher_context_get_launch_window (SnLauncherContext *context)
 {
   return context->launch_window;
 }
 
 const char*
-lf_launcher_context_get_launch_id (LfLauncherContext *context)
+sn_launcher_context_get_launch_id (SnLauncherContext *context)
 {
 
   return context->launch_id;
 }
 
-lf_bool_t
-lf_launcher_context_get_initiated (LfLauncherContext *context)
+sn_bool_t
+sn_launcher_context_get_initiated (SnLauncherContext *context)
 {
   return context->launch_id != NULL;
 }
 
-lf_bool_t
-lf_launcher_context_get_canceled (LfLauncherContext *context)
+sn_bool_t
+sn_launcher_context_get_canceled (SnLauncherContext *context)
 {
   return context->canceled;
 }
 
 /**
- * lf_launcher_context_get_completed:
- * @context: an #LfLauncherContext
+ * sn_launcher_context_get_completed:
+ * @context: an #SnLauncherContext
  *
  * Returns %TRUE if _NET_LAUNCH_COMPLETE has been set or the
  * launch sequence window has been destroyed.
  *
  * Return value: %TRUE if the launch sequence has been completed
  **/
-lf_bool_t
-lf_launcher_context_get_completed (LfLauncherContext *context)
+sn_bool_t
+sn_launcher_context_get_completed (SnLauncherContext *context)
 {
   return context->completed;
 }
 
 /**
- * lf_launcher_context_cancel:
- * @context: an #LfLauncherContext
+ * sn_launcher_context_cancel:
+ * @context: an #SnLauncherContext
  *
  * Marks the launch canceled by setting the _NET_LAUNCH_CANCELED
  * property on the launch window. May not be called if the launch has
- * not been initiated. An #LF_LAUNCHER_EVENT_CANCELED event should be
+ * not been initiated. An #SN_LAUNCHER_EVENT_CANCELED event should be
  * received in response to the cancellation, under normal
  * circumstances.
  *
- * lf_launcher_context_cancel() should be called to request a
+ * sn_launcher_context_cancel() should be called to request a
  * cancellation.  Normally the launcher process is the process that
  * performs the cancellation as well, in response to an
- * #LF_LAUNCHER_EVENT_CANCELED event.
+ * #SN_LAUNCHER_EVENT_CANCELED event.
  *
  **/
 void
-lf_launcher_context_cancel (LfLauncherContext *context)
+sn_launcher_context_cancel (SnLauncherContext *context)
 {
   if (context->launch_id == NULL)
     {
-      fprintf (stderr, "%s called for an LfLauncherContext that hasn't been initiated\n",
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
                __FUNCTION__);
       return;
     }
 
-  lf_internal_set_cardinal (context->display,
+  sn_internal_set_cardinal (context->display,
                             context->launch_window,
                             "_NET_LAUNCH_CANCELED",
                             0);
 }
 
 /**
- * lf_launcher_context_complete:
- * @context: an #LfLauncherContext
+ * sn_launcher_context_complete:
+ * @context: an #SnLauncherContext
  *
  * Marks @context as completed. Normally the launchee process marks a
  * launch sequence completed, however the launcher has to do it
@@ -503,24 +503,24 @@ lf_launcher_context_cancel (LfLauncherContext *context)
  * 
  **/
 void
-lf_launcher_context_complete (LfLauncherContext *context)
+sn_launcher_context_complete (SnLauncherContext *context)
 {
   if (context->launch_id == NULL)
     {
-      fprintf (stderr, "%s called for an LfLauncherContext that hasn't been initiated\n",
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
                __FUNCTION__);
       return;
     }
 
-  lf_internal_set_cardinal (context->display,
+  sn_internal_set_cardinal (context->display,
                             context->launch_window,
                             "_NET_LAUNCH_COMPLETE",
                             0);
 }
 
 /**
- * lf_launcher_context_setup_child_process:
- * @context: an #LfLauncherContext
+ * sn_launcher_context_setup_child_process:
+ * @context: an #SnLauncherContext
  *
  * This function should be called after forking, but before exec(), in
  * the child process being launched. It sets up the environment variables
@@ -530,7 +530,7 @@ lf_launcher_context_complete (LfLauncherContext *context)
  *
  **/
 void
-lf_launcher_context_setup_child_process (LfLauncherContext *context)
+sn_launcher_context_setup_child_process (SnLauncherContext *context)
 {
   char *launch_id;
   char *s;
@@ -538,20 +538,20 @@ lf_launcher_context_setup_child_process (LfLauncherContext *context)
 
   if (context->launch_id == NULL)
     {
-      fprintf (stderr, "%s called for an LfLauncherContext that hasn't been initiated\n",
+      fprintf (stderr, "%s called for an SnLauncherContext that hasn't been initiated\n",
                __FUNCTION__);
       return;
     }
 
   /* Man we need glib here */
 
-  launch_id = lf_malloc (strlen (context->launch_id) + strlen ("DESKTOP_LAUNCH_ID") + 3);
+  launch_id = sn_malloc (strlen (context->launch_id) + strlen ("DESKTOP_LAUNCH_ID") + 3);
   strcpy (launch_id, "DESKTOP_LAUNCH_ID=");
   strcat (launch_id, context->launch_id);
 
   putenv (launch_id);
 
-  launch_window = lf_malloc (strlen ("DESKTOP_LAUNCH_WINDOW") + 128);
+  launch_window = sn_malloc (strlen ("DESKTOP_LAUNCH_WINDOW") + 128);
   strcpy (launch_window, "DESKTOP_LAUNCH_WINDOW=");
   s = launch_window;
   while (*s)
@@ -565,14 +565,14 @@ lf_launcher_context_setup_child_process (LfLauncherContext *context)
 }
 
 #define WARN_ALREADY_INITIATED(context) do { if ((context)->launch_id != NULL) {               \
-      fprintf (stderr, "%s called for an LfLauncherContext that has already been initiated\n", \
+      fprintf (stderr, "%s called for an SnLauncherContext that has already been initiated\n", \
                __FUNCTION__);                                                                  \
       return;                                                                                  \
 } } while (0)
 
 void
-lf_launcher_context_set_launch_type (LfLauncherContext *context,
-                                     LfLaunchType       type)
+sn_launcher_context_set_launch_type (SnLauncherContext *context,
+                                     SnLaunchType       type)
 {
   WARN_ALREADY_INITIATED (context);
   
@@ -580,7 +580,7 @@ lf_launcher_context_set_launch_type (LfLauncherContext *context,
 }
 
 void
-lf_launcher_context_set_geometry_window (LfLauncherContext *context,
+sn_launcher_context_set_geometry_window (SnLauncherContext *context,
                                          Window             xwindow)
 {
   WARN_ALREADY_INITIATED (context);
@@ -589,8 +589,8 @@ lf_launcher_context_set_geometry_window (LfLauncherContext *context,
 }
 
 void
-lf_launcher_context_set_supports_cancel (LfLauncherContext *context,
-                                         lf_bool_t          supports_cancel)
+sn_launcher_context_set_supports_cancel (SnLauncherContext *context,
+                                         sn_bool_t          supports_cancel)
 {
   WARN_ALREADY_INITIATED (context);
 
@@ -598,27 +598,27 @@ lf_launcher_context_set_supports_cancel (LfLauncherContext *context,
 }
 
 void
-lf_launcher_context_set_launch_name (LfLauncherContext *context,
+sn_launcher_context_set_launch_name (SnLauncherContext *context,
                                      const char        *name)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->name);
-  context->name = lf_internal_strdup (name);
+  sn_free (context->name);
+  context->name = sn_internal_strdup (name);
 }
 
 void
-lf_launcher_context_set_launch_description (LfLauncherContext *context,
+sn_launcher_context_set_launch_description (SnLauncherContext *context,
                                             const char        *description)  
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->description);
-  context->description = lf_internal_strdup (description);
+  sn_free (context->description);
+  context->description = sn_internal_strdup (description);
 }
 
 void
-lf_launcher_context_set_launch_workspace (LfLauncherContext *context,
+sn_launcher_context_set_launch_workspace (SnLauncherContext *context,
                                           int                workspace)
 {
   WARN_ALREADY_INITIATED (context);
@@ -627,47 +627,47 @@ lf_launcher_context_set_launch_workspace (LfLauncherContext *context,
 }
 
 void
-lf_launcher_context_set_legacy_resource_class (LfLauncherContext *context,
+sn_launcher_context_set_legacy_resource_class (SnLauncherContext *context,
                                                const char        *klass)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->resource_class);
-  context->resource_class = lf_internal_strdup (klass);
+  sn_free (context->resource_class);
+  context->resource_class = sn_internal_strdup (klass);
 }
 
 void
-lf_launcher_context_set_legacy_resource_name (LfLauncherContext *context,
+sn_launcher_context_set_legacy_resource_name (SnLauncherContext *context,
                                               const char        *name)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->resource_name);
-  context->resource_name = lf_internal_strdup (name);
+  sn_free (context->resource_name);
+  context->resource_name = sn_internal_strdup (name);
 }
 
 void
-lf_launcher_context_set_legacy_window_title (LfLauncherContext *context,
+sn_launcher_context_set_legacy_window_title (SnLauncherContext *context,
                                              const char        *title)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->window_title);
-  context->window_title = lf_internal_strdup (title);
+  sn_free (context->window_title);
+  context->window_title = sn_internal_strdup (title);
 }
 
 void
-lf_launcher_context_set_binary_name (LfLauncherContext *context,
+sn_launcher_context_set_binary_name (SnLauncherContext *context,
                                      const char        *name)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->binary_name);
-  context->binary_name = lf_internal_strdup (name);
+  sn_free (context->binary_name);
+  context->binary_name = sn_internal_strdup (name);
 }
 
 void
-lf_launcher_context_set_pid (LfLauncherContext *context,
+sn_launcher_context_set_pid (SnLauncherContext *context,
                              int                pid)
 {
   context->pid = pid;
@@ -675,7 +675,7 @@ lf_launcher_context_set_pid (LfLauncherContext *context,
   /* set the X property if launch window already exists */
   if (context->launch_id != NULL)
     {
-      lf_internal_set_cardinal (context->display,
+      sn_internal_set_cardinal (context->display,
                                 context->launch_window,
                                 "_NET_LAUNCH_PID",
                                 context->pid);
@@ -683,114 +683,114 @@ lf_launcher_context_set_pid (LfLauncherContext *context,
 }
 
 void
-lf_launcher_context_set_icon_name (LfLauncherContext *context,
+sn_launcher_context_set_icon_name (SnLauncherContext *context,
                                    const char        *name)
 {
   WARN_ALREADY_INITIATED (context);
 
-  lf_free (context->icon_name);
-  context->icon_name = lf_internal_strdup (name);
+  sn_free (context->icon_name);
+  context->icon_name = sn_internal_strdup (name);
 }
 
-struct LfLauncherEvent
+struct SnLauncherEvent
 {
   int refcount;
-  LfLauncherEventType type;
+  SnLauncherEventType type;
   Time timestamp;
-  LfLauncherContext *context;
+  SnLauncherContext *context;
 };
 
 /**
- * lf_launcher_event_copy:
+ * sn_launcher_event_copy:
  * @event: event to copy
  *
  * Creates a copy of @event, the copy has a reference count of one.
  *
- * Return value: a new #LfLauncherEvent that's a copy of @event
+ * Return value: a new #SnLauncherEvent that's a copy of @event
  **/
-LfLauncherEvent*
-lf_launcher_event_copy (LfLauncherEvent *event)
+SnLauncherEvent*
+sn_launcher_event_copy (SnLauncherEvent *event)
 {
-  LfLauncherEvent *copy;
+  SnLauncherEvent *copy;
 
-  copy = lf_new (LfLauncherEvent, 1);
+  copy = sn_new (SnLauncherEvent, 1);
 
   copy->refcount = 1;
   copy->type = event->type;
   copy->timestamp = event->timestamp;
   copy->context = event->context;
   if (copy->context)
-    lf_launcher_context_ref (copy->context);
+    sn_launcher_context_ref (copy->context);
 
   return copy;
 }
 
 /**
- * lf_launcher_event_ref:
- * @event: a #LfLauncherEvent
+ * sn_launcher_event_ref:
+ * @event: a #SnLauncherEvent
  *
  * Increments @event's reference count.
  **/
 void
-lf_launcher_event_ref (LfLauncherEvent *event)
+sn_launcher_event_ref (SnLauncherEvent *event)
 {
   event->refcount += 1;
 }
 
 /**
- * lf_launcher_event_unref:
- * @event: a #LfLauncherEvent
+ * sn_launcher_event_unref:
+ * @event: a #SnLauncherEvent
  *
  * Decrements @event's reference count and frees @event
  * if the count reaches zero.
  **/
 void
-lf_launcher_event_unref (LfLauncherEvent *event)
+sn_launcher_event_unref (SnLauncherEvent *event)
 {
   event->refcount -= 1;
 
   if (event->refcount == 0)
     {
       if (event->context)
-        lf_launcher_context_unref (event->context);
-      lf_free (event);
+        sn_launcher_context_unref (event->context);
+      sn_free (event);
     }
 }
 
 /**
- * lf_launcher_event_get_type:
- * @event: a #LfLauncherEvent
+ * sn_launcher_event_get_type:
+ * @event: a #SnLauncherEvent
  *
  * Gets the type of the launcher event.
  *
  * Return value: the type of event
  **/
-LfLauncherEventType
-lf_launcher_event_get_type (LfLauncherEvent *event)
+SnLauncherEventType
+sn_launcher_event_get_type (SnLauncherEvent *event)
 {
   return event->type;
 }
 
 /**
- * lf_launcher_event_get_context:
- * @event: a #LfLauncherEvent
+ * sn_launcher_event_get_context:
+ * @event: a #SnLauncherEvent
  *
  * Gets the context associated with @event. The
  * returned context is owned by the event, i.e.
- * the caller of lf_launcher_event_get_context() should
+ * the caller of sn_launcher_event_get_context() should
  * not unref the context.
  *
  * Return value: the context for this event
  **/
-LfLauncherContext*
-lf_launcher_event_get_context (LfLauncherEvent *event)
+SnLauncherContext*
+sn_launcher_event_get_context (SnLauncherEvent *event)
 {
   return event->context;
 }
 
 /**
- * lf_launcher_event_get_time:
- * @event: a #LfLauncherEvent
+ * sn_launcher_event_get_time:
+ * @event: a #SnLauncherEvent
  *
  * Gets the X Window System timestamp associated with this launcher
  * event.
@@ -798,40 +798,40 @@ lf_launcher_event_get_context (LfLauncherEvent *event)
  * Return value: timestamp for the event, or CurrentTime if none available
  **/
 Time
-lf_launcher_event_get_time (LfLauncherEvent *event)
+sn_launcher_event_get_time (SnLauncherEvent *event)
 {
   return event->timestamp;
 }
 
-static lf_bool_t
-check_cardinal_exists (LfDisplay  *display,
+static sn_bool_t
+check_cardinal_exists (SnDisplay  *display,
                        Window      xwindow,
                        const char *property)
 {
   int val;
 
-  return lf_internal_get_cardinal (display, xwindow, property,
+  return sn_internal_get_cardinal (display, xwindow, property,
                                    &val);
 }
 
 typedef struct
 {
-  LfDisplay *display;
+  SnDisplay *display;
   Window     launch_window;
-  lf_bool_t  result;
+  sn_bool_t  result;
 } HaveContextsData;
 
-static lf_bool_t
+static sn_bool_t
 have_active_contexts_foreach (void *value,
                               void *data)
 {
-  LfLauncherContext *context = value;
+  SnLauncherContext *context = value;
   HaveContextsData *hcd = data;
 
   if (!context->completed &&
       context->launch_window == hcd->launch_window &&
-      lf_display_get_x_display (context->display) ==
-      lf_display_get_x_display (hcd->display))
+      sn_display_get_x_display (context->display) ==
+      sn_display_get_x_display (hcd->display))
     {
       hcd->result = TRUE;
       return FALSE;
@@ -842,63 +842,63 @@ have_active_contexts_foreach (void *value,
 
 typedef struct
 {
-  LfDisplay *display;
+  SnDisplay *display;
   Window     launch_window;
-  LfList    *contexts;
+  SnList    *contexts;
 } FindContextsData;
 
-static lf_bool_t
+static sn_bool_t
 find_active_contexts_foreach (void *value,
                               void *data)
 {
-  LfLauncherContext *context = value;
+  SnLauncherContext *context = value;
   FindContextsData *fcd = data;
 
   if (!context->completed &&
       context->launch_window == fcd->launch_window &&
-      lf_display_get_x_display (context->display) ==
-      lf_display_get_x_display (fcd->display))
-    lf_list_prepend (fcd->contexts, context);
+      sn_display_get_x_display (context->display) ==
+      sn_display_get_x_display (fcd->display))
+    sn_list_prepend (fcd->contexts, context);
 
   return TRUE;
 }
 
 typedef struct
 {
-  LfLauncherEvent *base_event;
-  LfList *events;
+  SnLauncherEvent *base_event;
+  SnList *events;
 } CreateEventsData;
 
-static lf_bool_t
+static sn_bool_t
 create_events_foreach (void *value,
                        void *data)
 {
-  LfLauncherContext *context = value;
+  SnLauncherContext *context = value;
   CreateEventsData *ced = data;
-  LfLauncherEvent *event;
+  SnLauncherEvent *event;
 
-  event = lf_launcher_event_copy (ced->base_event);
+  event = sn_launcher_event_copy (ced->base_event);
   event->context = context;
-  lf_launcher_context_ref (context);
+  sn_launcher_context_ref (context);
 
-  lf_list_prepend (ced->events, event);
+  sn_list_prepend (ced->events, event);
 
   return TRUE;
 }
 
-static lf_bool_t
+static sn_bool_t
 dispatch_events_foreach (void *value,
                          void *data)
 {
-  LfLauncherEvent *event = value;
+  SnLauncherEvent *event = value;
 
   /* Filter out duplicate events and update flags */
   switch (event->type)
     {
-    case LF_LAUNCHER_EVENT_CANCELED:
+    case SN_LAUNCHER_EVENT_CANCELED:
       if (event->context->canceled)
         {
-          lf_launcher_event_unref (event);
+          sn_launcher_event_unref (event);
           event = NULL;
         }
       else
@@ -906,10 +906,10 @@ dispatch_events_foreach (void *value,
           event->context->canceled = TRUE;
         }
       break;
-    case LF_LAUNCHER_EVENT_COMPLETED:
+    case SN_LAUNCHER_EVENT_COMPLETED:
       if (event->context->completed)
         {
-          lf_launcher_event_unref (event);
+          sn_launcher_event_unref (event);
           event = NULL;
         }
       else
@@ -927,16 +927,16 @@ dispatch_events_foreach (void *value,
       if (event->context->event_func)
         (* event->context->event_func) (event,
                                         event->context->event_func_data);
-      lf_launcher_event_unref (event);
+      sn_launcher_event_unref (event);
     }
 
   return TRUE;
 }
 
 static void
-dispatch_event (LfDisplay       *display,
+dispatch_event (SnDisplay       *display,
                 Window           launch_window,
-                LfLauncherEvent *event)
+                SnLauncherEvent *event)
 {
   /* Find all applicable contexts, create an event for each, and send
    * the events out.
@@ -946,32 +946,32 @@ dispatch_event (LfDisplay       *display,
 
   fcd.display = display;
   fcd.launch_window = launch_window;
-  fcd.contexts = lf_list_new ();
+  fcd.contexts = sn_list_new ();
 
   if (context_list != NULL)
-    lf_list_foreach (context_list, find_active_contexts_foreach, &fcd);
+    sn_list_foreach (context_list, find_active_contexts_foreach, &fcd);
 
   ced.base_event = event;
-  ced.events = lf_list_new ();
-  lf_list_foreach (fcd.contexts, create_events_foreach, &ced);
+  ced.events = sn_list_new ();
+  sn_list_foreach (fcd.contexts, create_events_foreach, &ced);
 
   /* This unref's each event as it's dispatched */
-  lf_list_foreach (ced.events, dispatch_events_foreach, NULL);
+  sn_list_foreach (ced.events, dispatch_events_foreach, NULL);
 
-  lf_list_free (fcd.contexts);
-  lf_list_free (ced.events);
+  sn_list_free (fcd.contexts);
+  sn_list_free (ced.events);
 }
      
-lf_bool_t
-lf_internal_launcher_process_event (LfDisplay *display,
+sn_bool_t
+sn_internal_launcher_process_event (SnDisplay *display,
                                     XEvent    *xevent)
 {
-  lf_bool_t retval;
-  LfLauncherEvent *event;
+  sn_bool_t retval;
+  SnLauncherEvent *event;
   Window event_xwindow;
 
   if (context_list == NULL ||
-      lf_list_empty (context_list))
+      sn_list_empty (context_list))
     return FALSE; /* no one cares */
   
   event_xwindow = None;
@@ -982,17 +982,17 @@ lf_internal_launcher_process_event (LfDisplay *display,
     {
     case PropertyNotify:
       if (xevent->xproperty.atom ==
-          lf_internal_atom_get (display, "_NET_LAUNCH_CANCELED"))
+          sn_internal_atom_get (display, "_NET_LAUNCH_CANCELED"))
         {
           event_xwindow = xevent->xproperty.window;
 
           if (check_cardinal_exists (display, event_xwindow,
                                      "_NET_LAUNCH_CANCELED"))
             {
-              event = lf_new (LfLauncherEvent, 1);
+              event = sn_new (SnLauncherEvent, 1);
 
               event->refcount = 1;
-              event->type = LF_LAUNCHER_EVENT_CANCELED;
+              event->type = SN_LAUNCHER_EVENT_CANCELED;
               event->timestamp = xevent->xproperty.time;
               event->context = NULL;
             }
@@ -1000,17 +1000,17 @@ lf_internal_launcher_process_event (LfDisplay *display,
           retval = TRUE;
         }
       else if (xevent->xproperty.atom ==
-               lf_internal_atom_get (display, "_NET_LAUNCH_COMPLETE"))
+               sn_internal_atom_get (display, "_NET_LAUNCH_COMPLETE"))
         {
           event_xwindow = xevent->xproperty.window;
 
           if (check_cardinal_exists (display, event_xwindow,
                                      "_NET_LAUNCH_COMPLETE"))
             {
-              event = lf_new (LfLauncherEvent, 1);
+              event = sn_new (SnLauncherEvent, 1);
 
               event->refcount = 1;
-              event->type = LF_LAUNCHER_EVENT_COMPLETED;
+              event->type = SN_LAUNCHER_EVENT_COMPLETED;
               event->timestamp = xevent->xproperty.time;
               event->context = NULL;
             }
@@ -1021,15 +1021,15 @@ lf_internal_launcher_process_event (LfDisplay *display,
 
     case ClientMessage:
       if (xevent->xclient.message_type ==
-          lf_internal_atom_get (display,
+          sn_internal_atom_get (display,
                                 "_NET_LAUNCH_PULSE"))
         {
           event_xwindow = xevent->xclient.window;
 
-          event = lf_new (LfLauncherEvent, 1);
+          event = sn_new (SnLauncherEvent, 1);
 
           event->refcount = 1;
-          event->type = LF_LAUNCHER_EVENT_PULSE;
+          event->type = SN_LAUNCHER_EVENT_PULSE;
           event->timestamp = CurrentTime;
           event->context = NULL;
 
@@ -1044,15 +1044,15 @@ lf_internal_launcher_process_event (LfDisplay *display,
         hcd.launch_window = xevent->xdestroywindow.window;
         hcd.result = FALSE;
         if (context_list)
-          lf_list_foreach (context_list, have_active_contexts_foreach, &hcd);
+          sn_list_foreach (context_list, have_active_contexts_foreach, &hcd);
         if (hcd.result)
           {
             event_xwindow = hcd.launch_window;
 
-            event = lf_new (LfLauncherEvent, 1);
+            event = sn_new (SnLauncherEvent, 1);
 
             event->refcount = 1;
-            event->type = LF_LAUNCHER_EVENT_COMPLETED;
+            event->type = SN_LAUNCHER_EVENT_COMPLETED;
             event->timestamp = CurrentTime;
             event->context = NULL;
           }
@@ -1067,7 +1067,7 @@ lf_internal_launcher_process_event (LfDisplay *display,
     {
       dispatch_event (display, event_xwindow, event);
       
-      lf_launcher_event_unref (event);
+      sn_launcher_event_unref (event);
     }
 
   return retval;

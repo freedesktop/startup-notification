@@ -1,31 +1,31 @@
 
-INCLUDES=-I$(top_srcdir) $(LIBLF_CFLAGS)
+INCLUDES=-I$(top_srcdir) $(LIBSN_CFLAGS)
 
-liblfincludedir=$(includedir)/liblf-1.0/liblf
+libsnincludedir=$(includedir)/libsn-1.0/libsn
 
-lib_LTLIBRARIES=liblf-1.la
+lib_LTLIBRARIES=libsn-1.la
 
-liblfinclude_HEADERS=				\
+libsninclude_HEADERS=				\
 	lf.h					\
-	lf-common.h				\
-	lf-launchee.h				\
-	lf-launcher.h				\
-	lf-monitor.h				\
-	lf-util.h
+	sn-common.h				\
+	sn-launchee.h				\
+	sn-launcher.h				\
+	sn-monitor.h				\
+	sn-util.h
 
-liblf_1_la_SOURCES=				\
-	lf-common.c				\
-	lf-internals.c				\
-	lf-internals.h				\
-	lf-launchee.c				\
-	lf-launcher.c				\
-	lf-list.c				\
-	lf-list.h				\
-	lf-monitor.c				\
-	lf-util.c				\
-	lf-xmessages.c				\
-	lf-xmessages.h				\
-	lf-xutils.c				\
-	lf-xutils.h
+libsn_1_la_SOURCES=				\
+	sn-common.c				\
+	sn-internals.c				\
+	sn-internals.h				\
+	sn-launchee.c				\
+	sn-launcher.c				\
+	sn-list.c				\
+	sn-list.h				\
+	sn-monitor.c				\
+	sn-util.c				\
+	sn-xmessages.c				\
+	sn-xmessages.h				\
+	sn-xutils.c				\
+	sn-xutils.h
 
-liblf_1_la_LIBADD= $(LIBLF_LIBS)
+libsn_1_la_LIBADD= $(LIBSN_LIBS)

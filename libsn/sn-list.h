@@ -24,32 +24,32 @@
  */
 
 
-#ifndef __LF_LIST_H__
-#define __LF_LIST_H__
+#ifndef __SN_LIST_H__
+#define __SN_LIST_H__
 
-#include <liblf/lf-util.h>
+#include <libsn/sn-util.h>
 
-LF_BEGIN_DECLS
+SN_BEGIN_DECLS
 
-/* FIXME use lf_internal prefix for all this */
+/* FIXME use sn_internal prefix for all this */
 
-typedef struct LfList LfList;
+typedef struct SnList SnList;
 
-typedef lf_bool_t (* LfListForeachFunc) (void *value, void *data);
+typedef sn_bool_t (* SnListForeachFunc) (void *value, void *data);
 
-LfList* lf_list_new     (void);
-void    lf_list_free    (LfList            *list);
-void    lf_list_prepend (LfList            *list,
+SnList* sn_list_new     (void);
+void    sn_list_free    (SnList            *list);
+void    sn_list_prepend (SnList            *list,
                          void              *data);
-void    lf_list_append  (LfList            *list,
+void    sn_list_append  (SnList            *list,
                          void              *data);
-void    lf_list_remove  (LfList            *list,
+void    sn_list_remove  (SnList            *list,
                          void              *data);
-void    lf_list_foreach (LfList            *list,
-                         LfListForeachFunc  func,
+void    sn_list_foreach (SnList            *list,
+                         SnListForeachFunc  func,
                          void              *data);
-lf_bool_t lf_list_empty (LfList            *list);
+sn_bool_t sn_list_empty (SnList            *list);
 
-LF_END_DECLS
+SN_END_DECLS
 
-#endif /* __LF_LIST_H__ */
+#endif /* __SN_LIST_H__ */

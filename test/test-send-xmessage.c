@@ -23,8 +23,8 @@
  */
 
 #include <config.h>
-#include <liblf/lf.h>
-#include <liblf/lf-xmessages.h>
+#include <libsn/sn.h>
+#include <libsn/sn-xmessages.h>
 
 #include "test-boilerplate.h"
 
@@ -32,7 +32,7 @@ int
 main (int argc, char **argv)
 {
   Display *xdisplay;
-  LfDisplay *display;
+  SnDisplay *display;
 
   if (argc != 3)
     {
@@ -47,16 +47,16 @@ main (int argc, char **argv)
       return 1;
     }
 
-  if (getenv ("LIBLF_SYNC") != NULL)
+  if (getenv ("LIBSN_SYNC") != NULL)
     XSynchronize (xdisplay, True);
   
   XSetErrorHandler (x_error_handler);
   
-  display = lf_display_new (xdisplay,
+  display = sn_display_new (xdisplay,
                             error_trap_push,
                             error_trap_pop);
   
-  lf_internal_broadcast_xmessage (display,
+  sn_internal_broadcast_xmessage (display,
                                   argv[1],
                                   argv[2]);
   
