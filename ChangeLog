@@ -1,3 +1,7 @@
+2002-10-22  Havoc Pennington  <hp@redhat.com>
+
+	* doc/startup-notification.txt: fixes from Lubos
+
 2002-10-21  Havoc Pennington  <hp@pobox.com>
 
 	* doc/startup-notification.txt: Add "SCREEN" property, and note 

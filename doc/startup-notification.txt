@@ -94,7 +94,7 @@ A string listing key-value pairs works as follows:
    key from the value.
 
  - Parsing of the value begins with the byte immediately following the
-   '=' byte, even if that byte is a space.  The value is parsed
+   '=' byte.  The value is parsed
    as follows.
 
    There are two dimensions, "escaped" and "quoted", creating 4
@@ -171,12 +171,15 @@ beginning of the message string, not the type of the X message):
  
   new:    message indicating that a new startup sequence has been
           initiated. The key-value pairs in this message indicate the
-          properties of the startup sequence.
+          properties of the startup sequence. If this startup sequence
+          already exists, "new:" message is equivalent to "change:"
+          (i.e. the values are updated instead of creating a new
+          startup sequence).
+          
 
-  change: message updating an existing startup sequence. May only be
-          sent if preceded by a "new" message.  If a client has not
-          seen a "new" message for the same sequence, then all
-          "change" messages should be ignored. i.e. a "change" 
+  change: message updating an existing startup sequence. If a client
+          has not seen a "new:" message for the same sequence, then
+          all "change:" messages should be ignored. i.e. a "change:" 
           message should not be taken as a "new:" message.
 
           "change" messages contain a subset of the keys allowed
@@ -192,7 +195,7 @@ All messages must include these keys:
   ID
  
           uniquely identifies a startup sequence; should be some globally 
-          unique string
+          unique string (for example, hostname+pid+current time).
 
 The following keys are required in a "new" message and may be included
 in either a "new" or a "changed" message:
@@ -221,10 +224,12 @@ The following keys may be provided optionally in either a "new" or a
 
   DESKTOP 
 
-          the desktop on which the application should appear, counting
-          from 0, as in _NET_WM_DESKTOP. However, this value should
-          never override a _NET_WM_DESKTOP property. This desktop is
-          relative to the screen provided by the SCREEN key.
+          the desktop on which the application should appear, 
+          counting from 0, as in _NET_WM_DESKTOP. However, 
+          this value should never override a _NET_WM_DESKTOP
+          property set on window that's being mapped.
+          This desktop is relative to the screen provided by 
+          the SCREEN key.
 
   DESCRIPTION   
 
@@ -245,7 +250,18 @@ The following keys may be provided optionally in either a "new" or a
           Latin-1 before strcmp'ing it with the window class/name. 
           (Though in all known cases only ASCII is involved so it 
           doesn't matter.)
-
+          
+  SILENT
+          
+          a boolean (1/0) value. When set to 1, there should be
+          no visual feedback. This can be used to suspend
+          the visual feedback temporarily, e.g. when
+          application shows a dialog during its startup before
+          mapping the main window. Another use is for launch
+          sequences for applications that are neither compliant
+          nor their WMClass is known, but which should preferably
+          have their window mapped on the desktop specified by
+          the value of DESKTOP.
 
 Some details of the startup sequence:
 
@@ -273,6 +289,9 @@ should be used:
  DESKTOP_STARTUP_ID
    value of the "ID" field in the "new" message
 
+It is suggested to unset this environment variable in the launchee
+as soon as it's read, to avoid possible reuse by some process started
+later by launchee.
 Mechanisms other than the environment variable may be used as well, as
 long as they are reliable. The environment variable is only used when
 the launchee code is in a process started by the launcher code; if
@@ -301,6 +320,15 @@ _NET_STARTUP_ID, UTF8_STRING
   The ID used for the startup sequence for the window. If set 
   on a group leader window, applies to all application windows
   in that group that do not set their own _NET_STARTUP_ID.
+
+
+Launchee failures
+===
+
+The launcher process is responsible for detecting launchee failures
+such as a crash and should end the launch sequence in such case.
+In case launchee fails to end the launch sequence, clients should
+treat the launch sequence as ended withing a reasonable time.
 
 
 A. Sample code to send X message
