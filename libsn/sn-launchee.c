@@ -173,8 +173,8 @@ void
 sn_launchee_context_setup_window (SnLauncheeContext *context,
                                   Window             xwindow)
 {
-  sn_internal_set_string (context->display,
-                          xwindow,
-                          "_NET_STARTUP_ID",
-                          context->startup_id);
+  sn_internal_set_utf8_string (context->display,
+                               xwindow,
+                               "_NET_STARTUP_ID",
+                               context->startup_id);
 }

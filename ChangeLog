@@ -1,3 +1,8 @@
+2002-12-15  Havoc Pennington  <hp@pobox.com>
+
+	* libsn/sn-launchee.c (sn_launchee_context_setup_window):
+	_NET_STARTUP_ID should be a UTF-8 string. #101237
+
 2002-12-07  Havoc Pennington  <hp@pobox.com>
 
 	* libsn/sn-xmessages.c (sn_internal_append_to_string_escaped):
