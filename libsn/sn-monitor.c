@@ -729,7 +729,7 @@ xmessage_func (SnDisplay  *display,
           /* Current spec says timestamp is part of the startup id; so we need
            * to get the timestamp here if the launcher is using the current spec
            */
-          time_str = sn_internal_find_last_occurrence(sequence->id, "_TIME");
+          time_str = sn_internal_find_last_occurrence (sequence->id, "_TIME");
           if (time_str != NULL)
             {
               /* Skip past the "_TIME" part */
