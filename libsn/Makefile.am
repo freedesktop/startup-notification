@@ -6,7 +6,7 @@ libsnincludedir=$(includedir)/libsn-1.0/libsn
 lib_LTLIBRARIES=libsn-1.la
 
 libsninclude_HEADERS=				\
-	lf.h					\
+	sn.h					\
 	sn-common.h				\
 	sn-launchee.h				\
 	sn-launcher.h				\
