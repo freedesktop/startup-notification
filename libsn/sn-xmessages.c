@@ -534,14 +534,16 @@ sn_internal_serialize_message (const char   *prefix,
   return retval;
 }
 
+/* Takes ownership of @append
+ */
 static void
-append_string_to_list (char     ***list,
-                       const char *append)
+append_string_to_list (char ***list,
+                       char   *append)
 {
   if (*list == NULL)
     {
       *list = sn_new0 (char*, 2);
-      (*list)[0] = sn_internal_strdup (append);
+      (*list)[0] = append;
     }
   else
     {
@@ -552,7 +554,7 @@ append_string_to_list (char     ***list,
         ++i;
 
       *list = sn_renew (char*, *list, i + 2);
-      (*list)[i] = sn_internal_strdup (append);
+      (*list)[i] = append;
       (*list)[i+1] = NULL;
     }
 }
@@ -691,6 +693,7 @@ parse_property (const char  *str,
     if (!unescape_string_inplace (p, &end))
       {
         sn_free (copy);
+        sn_free (name);
         return FALSE;
       }
 
