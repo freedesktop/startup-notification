@@ -343,10 +343,15 @@ StartupNotify=BOOLEAN
   If true, it is KNOWN that the application will send a "remove"
   message when started with the DESKTOP_LAUNCH_ID environment variable
   set.
+  If false, it is KNOWN that the application does not work
+  with startup notification at all (does not shown any window, breaks
+  even when using StartupWMClass, etc.).
+  If absent, a reasonable handling is up to implementations (assuming false,
+  using StartupWMClass, etc.).
 
 StartupWMClass=STRING
 
-  If true, it is KNOWN that the application will map at least one
+  If specified, it is KNOWN that the application will map at least one
   window with the given string as its WM class or WM name hint.
 
 EWMH spec extensions
