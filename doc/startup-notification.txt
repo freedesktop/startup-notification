@@ -362,6 +362,10 @@ _NET_STARTUP_ID, UTF8_STRING
   The ID used for the startup sequence for the window. If set 
   on a group leader window, applies to all application windows
   in that group that do not set their own _NET_STARTUP_ID.
+  
+  If a new value for the property is set, the window manager
+  should update the window's status accordingly (update its virtual
+  desktop, etc.).
 
 
 Launchee failures
@@ -431,3 +435,5 @@ Changes since 0.1:
 - TIMESTAMP field is obsoleted by including the timestamp directly in the ID.
 - data from "change:" messages should be used even if they precede the matching "new:" message
 - added LAUNCHED_BY
+- Explicitly mention that updating the _NET_STARTUP_ID property on a window should trigger
+  window manager's actions for the new startup notification again.
