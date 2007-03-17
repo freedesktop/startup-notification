@@ -1,3 +1,9 @@
+0.9
+===
+
+ - plug some leaks (Vincent Untz, Aivars Kalvans)
+ - fix compilation on sun machines (Laszlo Peter)
+
 0.8
 ===
 
