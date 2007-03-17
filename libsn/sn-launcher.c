@@ -182,7 +182,7 @@ sn_launcher_context_initiate (SnLauncherContext *context,
   if (context->startup_id != NULL)
     {
       fprintf (stderr, "%s called twice for the same SnLaunchContext\n",
-               __FUNCTION__);
+               __func__);
       return;
     }
 
@@ -369,7 +369,7 @@ sn_launcher_context_setup_child_process (SnLauncherContext *context)
 /* FIXME use something pluggable, not fprintf */
 #define WARN_ALREADY_INITIATED(context) do { if ((context)->startup_id != NULL) {               \
       fprintf (stderr, "%s called for an SnLauncherContext that has already been initiated\n", \
-               __FUNCTION__);                                                                  \
+               __func__);                                                                  \
       return;                                                                                  \
 } } while (0)
 
