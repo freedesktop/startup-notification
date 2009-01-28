@@ -275,7 +275,6 @@ some_handler_handles_event (SnDisplay *display,
 
 typedef struct
 {
-  Display *xdisplay;
   XEvent *xevent;
   SnXmessage *message;
 } FindMessageData;
@@ -313,7 +312,6 @@ add_event_to_messages (SnDisplay *display,
    */
 #define MAX_MESSAGE_LENGTH 4096
   
-  fmd.xdisplay = sn_display_get_x_display (display);
   fmd.xevent = xevent;
   fmd.message = NULL;
 
