@@ -275,7 +275,7 @@ some_handler_handles_event (SnDisplay *display,
 
 typedef struct
 {
-  XEvent *xevent;
+  Window window;
   SnXmessage *message;
 } FindMessageData;
 
@@ -286,7 +286,7 @@ find_message_foreach (void *value,
   SnXmessage *message = value;
   FindMessageData *fmd = data;
   
-  if (fmd->xevent->xclient.window == message->xwindow)
+  if (fmd->window == message->xwindow)
     {
       fmd->message = message;
       return FALSE;
@@ -312,7 +312,7 @@ add_event_to_messages (SnDisplay *display,
    */
 #define MAX_MESSAGE_LENGTH 4096
   
-  fmd.xevent = xevent;
+  fmd.window = xevent->xclient.window;
   fmd.message = NULL;
 
   sn_internal_display_get_xmessage_data (display, NULL,
