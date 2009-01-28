@@ -296,6 +296,17 @@ find_message_foreach (void *value,
 }
 
 static SnXmessage*
+message_new(Atom type_atom_begin, Window win)
+{
+  SnXmessage *message = sn_new0 (SnXmessage, 1);
+  message->type_atom_begin = type_atom_begin;
+  message->xwindow = win;
+  message->message = NULL;
+  message->allocated = 0;
+  return message;
+}
+
+static SnXmessage*
 add_event_to_messages (SnDisplay *display,
                        XEvent    *xevent)
 {
@@ -325,13 +336,7 @@ add_event_to_messages (SnDisplay *display,
 
   if (message == NULL)
     {
-      
-      message = sn_new0 (SnXmessage, 1);
-
-      message->type_atom_begin = xevent->xclient.message_type;
-      message->xwindow = xevent->xclient.window;
-      message->message = NULL;
-      message->allocated = 0;
+      message = message_new(xevent->xclient.message_type, xevent->xclient.window);
 
       sn_list_prepend (pending_messages, message);
     }
