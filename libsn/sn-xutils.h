@@ -35,60 +35,6 @@ void sn_internal_set_utf8_string (SnDisplay  *display,
                                   Window      xwindow,
                                   const char *property,
                                   const char *str);
-void sn_internal_set_string      (SnDisplay  *display,
-                                  Window      xwindow,
-                                  const char *property,
-                                  const char *str);
-void sn_internal_set_cardinal    (SnDisplay  *display,
-                                  Window      xwindow,
-                                  const char *property,
-                                  int         val);
-void sn_internal_set_window        (SnDisplay  *display,
-                                    Window      xwindow,
-                                    const char *property,
-                                    Window      val);
-void sn_internal_set_cardinal_list (SnDisplay  *display,
-                                    Window      xwindow,
-                                    const char *property,
-                                    int        *vals,
-                                    int         n_vals);
-void sn_internal_set_atom_list     (SnDisplay  *display,
-                                    Window      xwindow,
-                                    const char *property,
-                                    Atom       *vals,
-                                    int         n_vals);
-
-
-sn_bool_t sn_internal_get_utf8_string   (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         char       **val);
-sn_bool_t sn_internal_get_string        (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         char       **val);
-sn_bool_t sn_internal_get_cardinal      (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         int         *val);
-sn_bool_t sn_internal_get_window        (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         Window      *val);
-sn_bool_t sn_internal_get_atom_list     (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         Atom       **atoms,
-                                         int         *n_atoms);
-sn_bool_t sn_internal_get_cardinal_list (SnDisplay   *display,
-                                         Window       xwindow,
-                                         const char  *property,
-                                         int        **vals,
-                                         int         *n_vals);
-
-void sn_internal_send_event_all_screens (SnDisplay    *display,
-                                         unsigned long mask,
-                                         XEvent       *xevent);
 
 
 SN_END_DECLS
