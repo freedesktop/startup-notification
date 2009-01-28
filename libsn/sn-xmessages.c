@@ -339,23 +339,16 @@ message_set_message(SnXmessage *message, const char *src)
 }
 
 static SnXmessage*
-add_event_to_messages (SnDisplay *display,
-                       XEvent    *xevent)
+get_or_add_message(SnList *pending_messages,
+                   Window win,
+                   Atom type_atom_begin)
 {
   FindMessageData fmd;
   SnXmessage *message;
-  SnList *pending_messages;
-  
-  /* We don't want screwy situations to end up causing us to allocate
-   * infinite memory. Cap the length of a message.
-   */
-#define MAX_MESSAGE_LENGTH 4096
-  
-  fmd.window = xevent->xclient.window;
+
+  fmd.window = win;
   fmd.message = NULL;
 
-  sn_internal_display_get_xmessage_data (display, NULL,
-                                         &pending_messages);
   
   if (pending_messages)
     sn_list_foreach (pending_messages, find_message_foreach, &fmd);
@@ -364,11 +357,33 @@ add_event_to_messages (SnDisplay *display,
 
   if (message == NULL)
     {
-      message = message_new(xevent->xclient.message_type, xevent->xclient.window);
+      message = message_new(type_atom_begin, win);
 
       sn_list_prepend (pending_messages, message);
     }
   
+  return message;
+}
+
+static SnXmessage*
+add_event_to_messages (SnDisplay *display,
+                       XEvent    *xevent)
+{
+  SnXmessage *message;
+  SnList *pending_messages;
+
+  sn_internal_display_get_xmessage_data (display, NULL,
+                                         &pending_messages);
+
+  message = get_or_add_message(pending_messages,
+                               xevent->xclient.window,
+                               xevent->xclient.message_type);
+
+  /* We don't want screwy situations to end up causing us to allocate
+   * infinite memory. Cap the length of a message.
+   */
+#define MAX_MESSAGE_LENGTH 4096
+
   if (message->allocated > MAX_MESSAGE_LENGTH)
     {
       /* This message is some kind of crap - just dump it. */
