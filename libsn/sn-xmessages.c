@@ -306,16 +306,44 @@ message_new(Atom type_atom_begin, Window win)
   return message;
 }
 
+static sn_bool_t
+message_set_message(SnXmessage *message, const char *src)
+{
+  const char *src_end;
+  char *dest;
+  sn_bool_t completed = FALSE;
+
+  src_end = src + 20;
+
+  message->message = sn_realloc (message->message,
+                                 message->allocated + (src_end - src));
+  dest = message->message + message->allocated;
+  message->allocated += (src_end - src);
+
+  /* Copy bytes, be sure we get nul byte also */
+  while (src != src_end)
+    {
+      *dest = *src;
+
+      if (*src == '\0')
+        {
+          completed = TRUE;
+          break;
+        }
+
+      ++dest;
+      ++src;
+    }
+
+  return completed;
+}
+
 static SnXmessage*
 add_event_to_messages (SnDisplay *display,
                        XEvent    *xevent)
 {
   FindMessageData fmd;
   SnXmessage *message;
-  const char *src;
-  const char *src_end;
-  char *dest;
-  sn_bool_t completed;
   SnList *pending_messages;
   
   /* We don't want screwy situations to end up causing us to allocate
@@ -350,32 +378,7 @@ add_event_to_messages (SnDisplay *display,
       return NULL;
     }
   
-  src = &xevent->xclient.data.b[0];
-  src_end = src + 20;
-  
-  message->message = sn_realloc (message->message,
-                                 message->allocated + (src_end - src));
-  dest = message->message + message->allocated;
-  message->allocated += (src_end - src);
-
-  completed = FALSE;
-  
-  /* Copy bytes, be sure we get nul byte also */
-  while (src != src_end)
-    {
-      *dest = *src;
-      
-      if (*src == '\0')
-        {
-          completed = TRUE;
-          break;
-        }
-      
-      ++dest;
-      ++src;    
-    }
-  
-  if (completed)
+  if (message_set_message (message, &xevent->xclient.data.b[0]))
     {
       /* Pull message out of the pending queue and return it */
       sn_list_remove (pending_messages, message);
