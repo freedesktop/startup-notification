@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2002 Red Hat, Inc.
+ * Copyright (C) 2009 Julien Danjou <julien@danjou.info>
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,14 +27,35 @@
 #include "sn-common.h"
 #include "sn-internals.h"
 
+#ifdef HAVE_XCB
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+#endif
+
 struct SnDisplay
 {
   int refcount;
-  Display *xdisplay;
+  enum SnDisplayType type;
+  union
+  {
+      struct
+      {
+          Display *xdisplay;
+          Screen **screens;
+          SnDisplayErrorTrapPush push_trap_func;
+          SnDisplayErrorTrapPop  pop_trap_func;
+      } xlib;
+#ifdef HAVE_XCB
+      struct
+      {
+          xcb_connection_t *xconnection;
+          xcb_screen_t **screens;
+          SnXcbDisplayErrorTrapPush push_trap_func;
+          SnXcbDisplayErrorTrapPop  pop_trap_func;
+      } xcb;
+#endif
+  } x;
   int n_screens;
-  Screen **screens;
-  SnDisplayErrorTrapPush push_trap_func;
-  SnDisplayErrorTrapPop  pop_trap_func;
   SnList *xmessage_funcs;
   SnList *pending_messages;
 };
@@ -67,19 +89,66 @@ sn_display_new (Display                *xdisplay,
   
   display = sn_new0 (SnDisplay, 1);
 
-  display->xdisplay = xdisplay;
+  display->type = SN_DISPLAY_TYPE_XLIB;
+  display->x.xlib.xdisplay = xdisplay;
   display->n_screens = ScreenCount (xdisplay);
-  display->screens = sn_new (Screen*, display->n_screens);
+  display->x.xlib.screens = sn_new (Screen*, display->n_screens);
   display->refcount = 1;
 
-  display->push_trap_func = push_trap_func;
-  display->pop_trap_func = pop_trap_func;
-  
+  display->x.xlib.push_trap_func = push_trap_func;
+  display->x.xlib.pop_trap_func = pop_trap_func;
+
   for (i = 0; i < display->n_screens; ++i)
-    display->screens[i] = ScreenOfDisplay (display->xdisplay, i);
+    display->x.xlib.screens[i] = ScreenOfDisplay (display->x.xlib.xdisplay, i);
 
   return display;
 }
+
+#ifdef HAVE_XCB
+/**
+ * sn_xcb_display_new:
+ * @xdisplay: an X window system display
+ * @push_trap_func: function to push an X error trap
+ * @pop_trap_func: function to pop an X error trap
+ *
+ * Creates a new #SnDisplay object, containing
+ * data that libsn associates with an X display.
+ *
+ * @push_trap_func should be a function that causes X errors to be
+ * ignored until @pop_trap_func is called as many times as
+ * @push_trap_func has been called. (Nested push/pop pairs must be
+ * supported.) The outermost @pop_trap_func in a set of nested pairs
+ * must call XSync() to ensure that all errors that will occur have in
+ * fact occurred. These functions are used to avoid X errors due to
+ * BadWindow and such.
+ *
+ * Return value: the new #SnDisplay
+ **/
+SnDisplay*
+sn_xcb_display_new (xcb_connection_t          *xconnection,
+                    SnXcbDisplayErrorTrapPush  push_trap_func,
+                    SnXcbDisplayErrorTrapPop   pop_trap_func)
+{
+  SnDisplay *display;
+  int i;
+
+  display = sn_new0 (SnDisplay, 1);
+
+  display->type = SN_DISPLAY_TYPE_XCB;
+  display->x.xcb.xconnection = xconnection;
+  display->n_screens = xcb_setup_roots_length (xcb_get_setup (xconnection));
+  display->x.xcb.screens = sn_new (xcb_screen_t*, display->n_screens);
+  display->refcount = 1;
+
+  display->x.xcb.push_trap_func = push_trap_func;
+  display->x.xcb.pop_trap_func = pop_trap_func;
+  
+  for (i = 0; i < display->n_screens; ++i)
+    display->x.xcb.screens[i] = xcb_aux_get_screen(xconnection, i);
+
+  return display;
+}
+#endif
 
 /**
  * sn_display_ref:
@@ -110,7 +179,19 @@ sn_display_unref (SnDisplay *display)
         sn_list_free (display->xmessage_funcs);
       if (display->pending_messages)
         sn_list_free (display->pending_messages);
-      sn_free (display->screens);
+#ifdef HAVE_XCB
+      switch (display->type)
+      {
+       case SN_DISPLAY_TYPE_XCB:
+        sn_free (display->x.xcb.screens);
+        break;
+       case SN_DISPLAY_TYPE_XLIB:
+#endif
+        sn_free (display->x.xlib.screens);
+#ifdef HAVE_XCB
+        break;
+      }
+#endif
       sn_free (display);
     }
 }
@@ -126,9 +207,28 @@ sn_display_unref (SnDisplay *display)
 Display*
 sn_display_get_x_display (SnDisplay *display)
 {
-
-  return display->xdisplay;
+  if(display->type == SN_DISPLAY_TYPE_XLIB)
+      return display->x.xlib.xdisplay;
+  return NULL;
 }
+
+#ifdef HAVE_XCB
+/**
+ * sn_display_get_x_connection:
+ * @display: an #SnDisplay
+ *
+ *
+ *
+ * Return value: X connection for this #SnDisplay
+ **/
+xcb_connection_t*
+sn_display_get_x_connection(SnDisplay *display)
+{
+  if(display->type == SN_DISPLAY_TYPE_XCB)
+      return display->x.xcb.xconnection;
+  return NULL;
+}
+#endif
 
 /**
  * sn_internal_display_get_id:
@@ -141,27 +241,38 @@ sn_display_get_x_display (SnDisplay *display)
 void *
 sn_internal_display_get_id (SnDisplay *display)
 {
-    return display->xdisplay;
+#ifdef HAVE_XCB
+  switch (display->type)
+  {
+   case SN_DISPLAY_TYPE_XLIB:
+#endif
+    return display->x.xlib.xdisplay;
+#ifdef HAVE_XCB
+   case SN_DISPLAY_TYPE_XCB:
+    return display->x.xcb.xconnection;
+  }
+  return NULL;
+#endif
 }
 
 /**
  * sn_internal_display_get_x_screen:
  * @display: an #SnDisplay
  * @number: screen number to get
- * 
+ *
  * Gets a screen by number; if the screen number
  * does not exist, returns %NULL.
- * 
+ *
  * Return value: X screen or %NULL
  **/
 Screen*
 sn_internal_display_get_x_screen (SnDisplay *display,
                                   int        number)
 {
-  if (number < 0 || number >= display->n_screens)
+  if (display->type != SN_DISPLAY_TYPE_XLIB || number < 0 || number >= display->n_screens)
     return NULL;
   else
-    return display->screens[number];
+    return display->x.xlib.screens[number];
 }
 
 /**
@@ -178,10 +289,56 @@ Window
 sn_internal_display_get_root_window (SnDisplay *display,
                                      int       number)
 {
-    if (number < 0 || number >= display->n_screens)
-        return None;
-    return RootWindow (display->xdisplay, number);
+    if (number >= 0 && number < display->n_screens)
+#ifdef HAVE_XCB
+      switch (display->type)
+      {
+       case SN_DISPLAY_TYPE_XLIB:
+#endif
+        return RootWindow (display->x.xlib.xdisplay, number);
+#ifdef HAVE_XCB
+       case SN_DISPLAY_TYPE_XCB:
+        return display->x.xcb.screens[number]->root;
+      }
+#endif
+    return None;
 }
+
+/**
+ * sn_internal_display_get_type
+ * @display: an #SnDisplay
+ *
+ *
+ *
+ * Return value: X connection type
+ */
+enum SnDisplayType
+sn_internal_display_get_type (SnDisplay *display)
+{
+    return display->type;
+}
+
+#ifdef HAVE_XCB
+/**
+ * sn_internal_display_get_x_screen:
+ * @display: an #SnDisplay
+ * @number: screen number to get
+ * 
+ * Gets a screen by number; if the screen number
+ * does not exist, returns %NULL.
+ * 
+ * Return value: X screen or %NULL
+ **/
+xcb_screen_t*
+sn_internal_display_get_xcb_screen (SnDisplay *display,
+                                    int        number)
+{
+  if (display->type != SN_DISPLAY_TYPE_XCB || number < 0 || number >= display->n_screens)
+    return NULL;
+  else
+    return display->x.xcb.screens[number];
+}
+#endif
 
 /**
  * sn_internal_display_get_screen_number:
@@ -230,6 +387,41 @@ sn_display_process_event (SnDisplay *display,
   return retval;
 }
 
+#ifdef HAVE_XCB
+/**
+ * sn_xcb_display_process_event:
+ * @display: a display
+ * @xevent: X event
+ *
+ * libsn should be given a chance to see all X events by passing them
+ * to this function. If the event was a property notify or client
+ * message related to the launch feedback protocol, the
+ * sn_display_process_event() returns true. Calling
+ * sn_display_process_event() is not currently required for launchees,
+ * only launchers and launch feedback displayers. The function returns
+ * false for mapping, unmapping, window destruction, and selection
+ * events even if they were involved in launch feedback.
+ *
+ * Return value: true if the event was a property notify or client message involved in launch feedback
+ **/
+sn_bool_t
+sn_xcb_display_process_event (SnDisplay           *display,
+                              xcb_generic_event_t *xevent)
+{
+  sn_bool_t retval;
+
+  retval = FALSE;
+
+  if (sn_internal_monitor_process_event (display))
+    retval = TRUE;
+
+  if (sn_xcb_internal_xmessage_process_event (display, xevent))
+    retval = TRUE;
+
+  return retval;
+}
+#endif
+
 /**
  * sn_display_error_trap_push:
  * @display: a display
@@ -239,8 +431,21 @@ sn_display_process_event (SnDisplay *display,
 void
 sn_display_error_trap_push (SnDisplay *display)
 {
-  if (display->push_trap_func)
-    (* display->push_trap_func) (display, display->xdisplay);
+#ifdef HAVE_XCB
+  switch (display->type)
+  {
+   case SN_DISPLAY_TYPE_XCB:
+    if (display->x.xcb.push_trap_func)
+      (* display->x.xcb.push_trap_func) (display, display->x.xcb.xconnection);
+    break;
+   case SN_DISPLAY_TYPE_XLIB:
+#endif
+    if (display->x.xlib.push_trap_func)
+      (* display->x.xlib.push_trap_func) (display, display->x.xlib.xdisplay);
+#ifdef HAVE_XCB
+    break;
+  }
+#endif
 }
 
 /**
@@ -252,8 +457,21 @@ sn_display_error_trap_push (SnDisplay *display)
 void
 sn_display_error_trap_pop  (SnDisplay *display)
 {
-  if (display->pop_trap_func)
-    (* display->pop_trap_func) (display, display->xdisplay);
+#ifdef HAVE_XCB
+  switch (display->type)
+  {
+   case SN_DISPLAY_TYPE_XCB:
+    if (display->x.xcb.pop_trap_func)
+      (* display->x.xcb.pop_trap_func) (display, display->x.xcb.xconnection);
+    break;
+   case SN_DISPLAY_TYPE_XLIB:
+#endif
+    if (display->x.xlib.pop_trap_func)
+      (* display->x.xlib.pop_trap_func) (display, display->x.xlib.xdisplay);
+#ifdef HAVE_XCB
+    break;
+  }
+#endif
 }
 
 void

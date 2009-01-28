@@ -49,6 +49,12 @@ SN_BEGIN_DECLS
 #define NULL ((void*) 0)
 #endif
 
+enum SnDisplayType
+{
+    SN_DISPLAY_TYPE_XLIB,
+    SN_DISPLAY_TYPE_XCB
+};
+
 /* --- From sn-common.c --- */
 Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
                                                 int                     number);
@@ -58,6 +64,13 @@ Window     sn_internal_display_get_root_window (SnDisplay              *display,
 int        sn_internal_display_get_screen_number (SnDisplay *display);
 
 void*      sn_internal_display_get_id (SnDisplay *display);
+
+#ifdef HAVE_XCB
+xcb_screen_t* sn_internal_display_get_xcb_screen (SnDisplay              *display,
+                                                  int                     number);
+#endif
+
+enum SnDisplayType sn_internal_display_get_type (SnDisplay *display);
 
 void       sn_internal_display_get_xmessage_data (SnDisplay              *display,
                                                   SnList                **funcs,
@@ -86,6 +99,11 @@ void sn_internal_append_to_string (char      **append_to,
 /* --- From sn-xmessages.c --- */
 sn_bool_t sn_internal_xmessage_process_event (SnDisplay *display,
                                               XEvent    *xevent);
+
+#ifdef HAVE_XCB
+sn_bool_t sn_xcb_internal_xmessage_process_event (SnDisplay          *display,
+                                                  xcb_generic_event_t *xevent);
+#endif
 
 SN_END_DECLS
 

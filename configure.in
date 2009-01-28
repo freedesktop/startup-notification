@@ -78,8 +78,22 @@ fi
 ## try definining HAVE_BACKTRACE
 AC_CHECK_HEADERS(execinfo.h, [AC_CHECK_FUNCS(backtrace)])
 
-LIBSN_CFLAGS=$X_CFLAGS
-LIBSN_LIBS=" $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
+AC_ARG_WITH([xcb], AS_HELP_STRING([--with-xcb], [build with XCB library]))
+
+if test "x$with_xcb" = "xyes"; then
+    PKG_CHECK_MODULES([xcb], [xcb],,
+        [AC_MSG_ERROR([Cannot find xcb])])
+    PKG_CHECK_MODULES([xcb_aux], [xcb-aux],,
+        [AC_MSG_ERROR([Cannot find xcb-aux])])
+    PKG_CHECK_MODULES([xcb_event], [xcb-event],,
+        [AC_MSG_ERROR([Cannot find xcb-event])])
+    PKG_CHECK_MODULES([xcb_atom], [xcb-atom],,
+        [AC_MSG_ERROR([Cannot find xcb-atom])])
+    AC_DEFINE([HAVE_XCB],1,[Defined to use xcb])
+fi
+
+LIBSN_CFLAGS="$X_CFLAGS $xcb_CFLAGS $xcb_aux_CFLAGS $xcb_event_CFLAGS $xcb_atom_CFLAGS"
+LIBSN_LIBS=" $xcb_LIBS $xcb_aux_LIBS $xcb_event_LIBS $xcb_atom_LIBS $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
 AC_SUBST(LIBSN_CFLAGS)
 AC_SUBST(LIBSN_LIBS)
 

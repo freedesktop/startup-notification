@@ -1,3 +1,7 @@
+2009-01-28  Julien Danjou  <julien@danjou.info>
+
+	* add xcb support
+
 2007-03-17  Elijah Newren  <newren gmail com>
 
 	* configure.in: post-release bump to 0.10.

@@ -29,6 +29,14 @@
 #include <libsn/sn-util.h>
 #include <X11/Xlib.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_XCB
+#include <xcb/xcb.h>
+#endif
+
 SN_BEGIN_DECLS
 
 #ifndef SN_API_NOT_YET_FROZEN
@@ -42,14 +50,37 @@ typedef void (* SnDisplayErrorTrapPush) (SnDisplay *display,
 typedef void (* SnDisplayErrorTrapPop)  (SnDisplay *display,
                                          Display   *xdisplay);
 
+#ifdef HAVE_XCB
+typedef void (* SnXcbDisplayErrorTrapPush) (SnDisplay        *display,
+                                            xcb_connection_t *xconnection);
+typedef void (* SnXcbDisplayErrorTrapPop)  (SnDisplay        *display,
+                                            xcb_connection_t *xconnection);
+#endif
+
 SnDisplay* sn_display_new             (Display                *xdisplay,
                                        SnDisplayErrorTrapPush  push_trap_func,
                                        SnDisplayErrorTrapPop   pop_trap_func);
+
+#ifdef HAVE_XCB
+SnDisplay* sn_xcb_display_new         (xcb_connection_t          *xconnection,
+                                       SnXcbDisplayErrorTrapPush  push_trap_func,
+                                       SnXcbDisplayErrorTrapPop   pop_trap_func);
+#endif
+
 void       sn_display_ref             (SnDisplay              *display);
 void       sn_display_unref           (SnDisplay              *display);
 Display*   sn_display_get_x_display   (SnDisplay              *display);
+#ifdef HAVE_XCB
+xcb_connection_t* sn_display_get_x_connection (SnDisplay       *display);
+#endif
+
 sn_bool_t  sn_display_process_event   (SnDisplay              *display,
                                        XEvent                 *xevent);
+#ifdef HAVE_XCB
+sn_bool_t  sn_xcb_display_process_event (SnDisplay              *display,
+                                         xcb_generic_event_t    *xevent);
+#endif
+
 void       sn_display_error_trap_push (SnDisplay              *display);
 void       sn_display_error_trap_pop  (SnDisplay              *display);
 

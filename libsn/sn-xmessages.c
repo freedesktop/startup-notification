@@ -1,5 +1,6 @@
 /* 
  * Copyright (C) 2002 Red Hat, Inc.
+ * Copyright (C) 2009 Julien Danjou <julien@danjou.info>
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -21,6 +22,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#include <config.h>
+
+#ifdef HAVE_XCB
+#include <xcb/xcb_event.h>
+#endif
 
 #include "sn-xmessages.h"
 #include "sn-list.h"
@@ -145,11 +152,6 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                   const char     *message_type_begin,
                                   const char     *message)
 {
-  Atom type_atom;
-  Atom type_atom_begin;
-  Window xwindow;
-  Display *xdisplay;
-
   if (!sn_internal_utf8_validate (message, -1))
     {
       fprintf (stderr,
@@ -158,70 +160,137 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
       return;
     }
 
-  xdisplay = sn_display_get_x_display (display);
-
+#ifdef HAVE_XCB
+  switch (sn_internal_display_get_type (display))
   {
-    XSetWindowAttributes attrs;
-
-    attrs.override_redirect = True;
-    attrs.event_mask = PropertyChangeMask | StructureNotifyMask;
-
-    xwindow =
-      XCreateWindow (xdisplay,
-                     RootWindow (xdisplay, 0),
-                     -100, -100, 1, 1,
-                     0,
-                     CopyFromParent,
-                     CopyFromParent,
-                     CopyFromParent,
-                     CWOverrideRedirect | CWEventMask,
-                     &attrs);
-  }
-
-  type_atom = sn_internal_atom_get (display, message_type);
-  type_atom_begin = sn_internal_atom_get (display, message_type_begin);
+   case SN_DISPLAY_TYPE_XLIB:
+#endif
+    {
+      Atom type_atom;
+      Atom type_atom_begin;
+      Window xwindow;
+      XSetWindowAttributes attrs;
+      Display *xdisplay = sn_display_get_x_display (display);
   
-  {
-    XEvent xevent;
-    const char *src;
-    const char *src_end;
-    char *dest;
-    char *dest_end;
-    
-    xevent.xclient.type = ClientMessage;
-    xevent.xclient.message_type = type_atom_begin;
-    xevent.xclient.display = xdisplay;
-    xevent.xclient.window = xwindow;
-    xevent.xclient.format = 8;
+      attrs.override_redirect = True;
+      attrs.event_mask = PropertyChangeMask | StructureNotifyMask;
 
-    src = message;
-    src_end = message + strlen (message) + 1; /* +1 to include nul byte */
+      xwindow =
+        XCreateWindow (xdisplay,
+                       RootWindow (xdisplay, 0),
+                       -100, -100, 1, 1,
+                       0,
+                       CopyFromParent,
+                       CopyFromParent,
+                       CopyFromParent,
+                       CWOverrideRedirect | CWEventMask,
+                       &attrs);
+      type_atom = sn_internal_atom_get (display, message_type);
+      type_atom_begin = sn_internal_atom_get (display, message_type_begin);
     
-    while (src != src_end)
       {
-        dest = &xevent.xclient.data.b[0];
-        dest_end = dest + 20;        
+        XEvent xevent;
+        const char *src;
+        const char *src_end;
+        char *dest;
+        char *dest_end;
+
+        xevent.xclient.type = ClientMessage;
+        xevent.xclient.message_type = type_atom_begin;
+        xevent.xclient.display = xdisplay;
+        xevent.xclient.window = xwindow;
+        xevent.xclient.format = 8;
+
+        src = message;
+        src_end = message + strlen (message) + 1; /* +1 to include nul byte */
         
-        while (dest != dest_end &&
-               src != src_end)
+        while (src != src_end)
           {
-            *dest = *src;
-            ++dest;
-            ++src;
+            dest = &xevent.xclient.data.b[0];
+            dest_end = dest + 20;
+
+            while (dest != dest_end &&
+                   src != src_end)
+              {
+                *dest = *src;
+                ++dest;
+                ++src;
+              }
+
+            XSendEvent (xdisplay,
+                        RootWindow (xdisplay, screen),
+                        False,
+                        PropertyChangeMask,
+                        &xevent);
+
+            xevent.xclient.message_type = type_atom;
           }
-        
-        XSendEvent (xdisplay,
-                    RootWindow (xdisplay, screen),
-                    False,
-                    PropertyChangeMask,
-                    &xevent);
-
-        xevent.xclient.message_type = type_atom;
       }
-  }
 
-  XDestroyWindow (xdisplay, xwindow);
-  XFlush (xdisplay);
+      XDestroyWindow (xdisplay, xwindow);
+      XFlush (xdisplay);
+    }
+#ifdef HAVE_XCB
+    break;
+   case SN_DISPLAY_TYPE_XCB:
+    {
+      xcb_atom_t type_atom;
+      xcb_atom_t type_atom_begin;
+      xcb_window_t xwindow;
+      uint32_t attrs[] = { 1, XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY };
+      xcb_connection_t *xconnection = sn_display_get_x_connection (display);
+      xcb_screen_t *s = sn_internal_display_get_xcb_screen (display, screen);
+
+      xwindow = xcb_generate_id(xconnection);
+      xcb_create_window(xconnection, s->root_depth, xwindow, s->root,
+                        -100, -100, 1, 1, 0, XCB_COPY_FROM_PARENT, s->root_visual,
+                        XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                        attrs);
+
+      type_atom = sn_internal_atom_get (display, message_type);
+      type_atom_begin = sn_internal_atom_get (display, message_type_begin);
+
+      {
+        xcb_client_message_event_t xevent;
+        const char *src;
+        const char *src_end;
+        unsigned char *dest;
+        unsigned char *dest_end;
+
+        xevent.response_type = XCB_CLIENT_MESSAGE;
+        xevent.type = type_atom_begin;
+        xevent.window = xwindow;
+        xevent.format = 8;
+
+        src = message;
+        src_end = message + strlen (message) + 1; /* +1 to include nul byte */
+
+        while (src != src_end)
+          {
+            dest = &xevent.data.data8[0];
+            dest_end = dest + 20;
+
+            while (dest != dest_end &&
+                   src != src_end)
+              {
+                *dest = *src;
+                ++dest;
+                ++src;
+              }
+
+            xcb_send_event (xconnection, 0, s->root, XCB_EVENT_MASK_PROPERTY_CHANGE,
+                            (char *) &xevent);
+
+            xevent.type = type_atom;
+          }
+      }
+
+      xcb_destroy_window (xconnection, xwindow);
+      xcb_flush(xconnection);
+    }
+    break;
+  }
+#endif
 }
 
 typedef struct
@@ -252,7 +321,8 @@ handler_for_atom_foreach (void *value,
 
 static sn_bool_t
 some_handler_handles_event (SnDisplay *display,
-                            XEvent    *xevent)
+                            Atom atom,
+                            Window win)
 {
   HandlerForAtomData hfad;
   SnList *xmessage_funcs;
@@ -260,9 +330,9 @@ some_handler_handles_event (SnDisplay *display,
   sn_internal_display_get_xmessage_data (display, &xmessage_funcs,
                                          NULL);
   
-  hfad.atom = xevent->xclient.message_type;
+  hfad.atom = atom;
   hfad.xid = sn_internal_display_get_id (display);
-  hfad.xwindow = xevent->xclient.window;
+  hfad.xwindow = win;
   hfad.found_handler = FALSE;
 
   if (xmessage_funcs)
@@ -367,7 +437,9 @@ get_or_add_message(SnList *pending_messages,
 
 static SnXmessage*
 add_event_to_messages (SnDisplay *display,
-                       XEvent    *xevent)
+                       Window win,
+                       Atom message_type,
+                       const char *data)
 {
   SnXmessage *message;
   SnList *pending_messages;
@@ -376,8 +448,7 @@ add_event_to_messages (SnDisplay *display,
                                          &pending_messages);
 
   message = get_or_add_message(pending_messages,
-                               xevent->xclient.window,
-                               xevent->xclient.message_type);
+                               win, message_type);
 
   /* We don't want screwy situations to end up causing us to allocate
    * infinite memory. Cap the length of a message.
@@ -393,7 +464,7 @@ add_event_to_messages (SnDisplay *display,
       return NULL;
     }
   
-  if (message_set_message (message, &xevent->xclient.data.b[0]))
+  if (message_set_message (message, data))
     {
       /* Pull message out of the pending queue and return it */
       sn_list_remove (pending_messages, message);
@@ -476,11 +547,16 @@ sn_internal_xmessage_process_event (SnDisplay *display,
   switch (xevent->xany.type)
     {
     case ClientMessage:
-      if (some_handler_handles_event (display, xevent))
+      if (some_handler_handles_event (display,
+                                      xevent->xclient.message_type,
+                                      xevent->xclient.window))
         {
           retval = TRUE;
 
-          message = add_event_to_messages (display, xevent);
+          message = add_event_to_messages (display,
+                                           xevent->xclient.window,
+                                           xevent->xclient.message_type,
+                                           xevent->xclient.data.b);
         }
       break;
     }
@@ -489,6 +565,38 @@ sn_internal_xmessage_process_event (SnDisplay *display,
 
   return retval;
 }
+
+#ifdef HAVE_XCB
+sn_bool_t
+sn_xcb_internal_xmessage_process_event (SnDisplay           *display,
+                                        xcb_generic_event_t *xevent)
+{
+  sn_bool_t retval = FALSE;
+  SnXmessage *message = NULL;
+  xcb_client_message_event_t *ev = (xcb_client_message_event_t *) xevent;
+
+  switch (XCB_EVENT_RESPONSE_TYPE(xevent))
+    {
+    case XCB_CLIENT_MESSAGE:
+      if (some_handler_handles_event (display,
+                                      ev->type,
+                                      ev->window))
+        {
+          retval = TRUE;
+
+          message = add_event_to_messages (display,
+                                           ev->window,
+                                           ev->type,
+                                           (const char *) ev->data.data8);
+        }
+      break;
+    }
+
+  xmessage_process_message (display, message);
+
+  return retval;
+}
+#endif
 
 static void
 sn_internal_append_to_string_escaped (char      **append_to,
