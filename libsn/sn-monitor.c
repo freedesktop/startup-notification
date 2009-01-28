@@ -624,8 +624,8 @@ find_sequence_by_id_foreach (void *value,
   FindSequenceByIdData *fsd = data;
   
   if (strcmp (sequence->id, fsd->id) == 0 &&
-      sn_display_get_x_display (sequence->display) ==
-      sn_display_get_x_display (fsd->display))
+      sn_internal_display_get_id (sequence->display) ==
+      sn_internal_display_get_id (fsd->display))
     {
       fsd->found = sequence;
       return FALSE;

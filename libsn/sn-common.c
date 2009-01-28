@@ -131,6 +131,20 @@ sn_display_get_x_display (SnDisplay *display)
 }
 
 /**
+ * sn_internal_display_get_id:
+ * @display: an #SnDisplay
+ *
+ *
+ *
+ * Return value: X display id.
+ **/
+void *
+sn_internal_display_get_id (SnDisplay *display)
+{
+    return display->xdisplay;
+}
+
+/**
  * sn_internal_display_get_x_screen:
  * @display: an #SnDisplay
  * @number: screen number to get

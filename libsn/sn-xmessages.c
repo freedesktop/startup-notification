@@ -28,7 +28,7 @@
 
 typedef struct
 {
-  Display       *xdisplay;
+  void          *xid;
   Window         root;
   Atom           type_atom;
   Atom           type_atom_begin;
@@ -63,7 +63,7 @@ sn_internal_add_xmessage_func (SnDisplay      *display,
   
   handler = sn_new0 (SnXmessageHandler, 1);
 
-  handler->xdisplay = sn_display_get_x_display (display);
+  handler->xid = sn_internal_display_get_id (display);
   handler->root = sn_internal_display_get_root_window (display, screen);
   handler->type_atom = sn_internal_atom_get (display, message_type);
   handler->type_atom_begin = sn_internal_atom_get (display, message_type_begin);
@@ -226,7 +226,7 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
 
 typedef struct
 {
-  Display *xdisplay;
+  void *xid;
   Atom atom;
   Window xwindow;
   sn_bool_t found_handler;
@@ -239,7 +239,7 @@ handler_for_atom_foreach (void *value,
   SnXmessageHandler *handler = value;
   HandlerForAtomData *hfad = data;
   
-  if (handler->xdisplay == hfad->xdisplay &&
+  if (handler->xid == hfad->xid &&
       (handler->type_atom == hfad->atom ||
        handler->type_atom_begin == hfad->atom))
     {
@@ -261,7 +261,7 @@ some_handler_handles_event (SnDisplay *display,
                                          NULL);
   
   hfad.atom = xevent->xclient.message_type;
-  hfad.xdisplay = sn_display_get_x_display (display);
+  hfad.xid = sn_internal_display_get_id (display);
   hfad.xwindow = xevent->xclient.window;
   hfad.found_handler = FALSE;
 
@@ -394,7 +394,7 @@ dispatch_message_foreach (void *value,
   MessageDispatchData *mdd = data;  
   
   if (handler->type_atom_begin == mdd->message->type_atom_begin &&
-      sn_display_get_x_display (mdd->display) == handler->xdisplay)
+      sn_internal_display_get_id (mdd->display) == handler->xid)
     (* handler->func) (mdd->display,
                        handler->message_type,
                        mdd->message->message,
