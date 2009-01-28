@@ -426,29 +426,10 @@ dispatch_message_foreach (void *value,
   return TRUE;
 }
 
-sn_bool_t
-sn_internal_xmessage_process_event (SnDisplay *display,
-                                    XEvent    *xevent)
+static void
+xmessage_process_message (SnDisplay *display, SnXmessage *message)
 {
-  sn_bool_t retval;
-  SnXmessage *message;
-
-  retval = FALSE;
-  message = NULL;
-  
-  switch (xevent->xany.type)
-    {
-    case ClientMessage:
-      if (some_handler_handles_event (display, xevent))
-        {
-          retval = TRUE;
-          
-          message = add_event_to_messages (display, xevent);
-        }
-      break;
-    }
-
-  if (message != NULL)
+  if (message)
     {
       /* We need to dispatch and free this message; ignore
        * messages containing invalid UTF-8
@@ -483,7 +464,29 @@ sn_internal_xmessage_process_event (SnDisplay *display,
       sn_free (message->message);
       sn_free (message);
     }
-  
+}
+
+sn_bool_t
+sn_internal_xmessage_process_event (SnDisplay *display,
+                                    XEvent    *xevent)
+{
+  sn_bool_t retval = FALSE;
+  SnXmessage *message = NULL;
+
+  switch (xevent->xany.type)
+    {
+    case ClientMessage:
+      if (some_handler_handles_event (display, xevent))
+        {
+          retval = TRUE;
+
+          message = add_event_to_messages (display, xevent);
+        }
+      break;
+    }
+
+  xmessage_process_message (display, message);
+
   return retval;
 }
 
