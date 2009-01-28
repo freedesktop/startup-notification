@@ -64,7 +64,7 @@ sn_internal_add_xmessage_func (SnDisplay      *display,
   handler = sn_new0 (SnXmessageHandler, 1);
 
   handler->xdisplay = sn_display_get_x_display (display);
-  handler->root = RootWindow (handler->xdisplay, screen);
+  handler->root = sn_internal_display_get_root_window (display, screen);
   handler->type_atom = sn_internal_atom_get (display, message_type);
   handler->type_atom_begin = sn_internal_atom_get (display, message_type_begin);
   handler->message_type = sn_internal_strdup (message_type);
@@ -120,7 +120,7 @@ sn_internal_remove_xmessage_func (SnDisplay      *display,
   fhd.func = func;
   fhd.func_data = func_data;
   fhd.handler = NULL;
-  fhd.root = RootWindow (sn_display_get_x_display (display), screen);
+  fhd.root = sn_internal_display_get_root_window (display, screen);
   
   if (xmessage_funcs != NULL)
     sn_list_foreach (xmessage_funcs, find_handler_foreach, &fhd);

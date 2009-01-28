@@ -151,6 +151,25 @@ sn_internal_display_get_x_screen (SnDisplay *display,
 }
 
 /**
+ * sn_internal_display_get_root_window:
+ * @display: an #SnDisplay
+ * @number: screen number to get root window from
+ *
+ * Gets a root window; if the screen number
+ * does not exist, returns %NULL.
+ *
+ * Return value: X root window or %NULL
+ **/
+Window
+sn_internal_display_get_root_window (SnDisplay *display,
+                                     int       number)
+{
+    if (number < 0 || number >= display->n_screens)
+        return None;
+    return RootWindow (display->xdisplay, number);
+}
+
+/**
  * sn_display_process_event:
  * @display: a display
  * @xevent: X event

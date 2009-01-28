@@ -53,6 +53,9 @@ SN_BEGIN_DECLS
 Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
                                                 int                     number);
 
+Window     sn_internal_display_get_root_window (SnDisplay              *display,
+                                                int                     number);
+
 void       sn_internal_display_get_xmessage_data (SnDisplay              *display,
                                                   SnList                **funcs,
                                                   SnList                **pending);
