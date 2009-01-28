@@ -174,7 +174,7 @@ sn_display_process_event (SnDisplay *display,
 
   retval = FALSE;
 
-  if (sn_internal_monitor_process_event (display, xevent))
+  if (sn_internal_monitor_process_event (display))
     retval = TRUE;
 
   if (sn_internal_xmessage_process_event (display, xevent))

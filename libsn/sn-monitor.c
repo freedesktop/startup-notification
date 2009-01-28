@@ -596,8 +596,7 @@ dispatch_monitor_event (SnDisplay      *display,
 }
 
 sn_bool_t
-sn_internal_monitor_process_event (SnDisplay *display,
-                                   XEvent    *xevent)
+sn_internal_monitor_process_event (SnDisplay *display)
 {
   sn_bool_t retval;
 

@@ -58,8 +58,7 @@ void       sn_internal_display_get_xmessage_data (SnDisplay              *displa
                                                   SnList                **pending);
 
 /* --- From sn-monitor.c --- */
-sn_bool_t sn_internal_monitor_process_event (SnDisplay *display,
-                                             XEvent    *xevent);
+sn_bool_t sn_internal_monitor_process_event (SnDisplay *display);
 
 /* --- From sn-util.c --- */
 sn_bool_t sn_internal_utf8_validate (const char *str,
