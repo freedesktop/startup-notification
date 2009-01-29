@@ -170,6 +170,20 @@ sn_internal_display_get_root_window (SnDisplay *display,
 }
 
 /**
+ * sn_internal_display_get_screen_number:
+ * @display an #SnDisplay
+ *
+ *
+ *
+ * Return value: The number of screen for this #SnDisplay
+ **/
+int
+sn_internal_display_get_screen_number (SnDisplay *display)
+{
+    return display->n_screens;
+}
+
+/**
  * sn_display_process_event:
  * @display: a display
  * @xevent: X event

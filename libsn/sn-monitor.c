@@ -782,7 +782,7 @@ xmessage_func (SnDisplay  *display,
                 {
                   int n;
                   n = atoi (values[i]);
-                  if (n >= 0 && n < ScreenCount (sn_display_get_x_display (sequence->display)))
+                  if (n >= 0 && n < sn_internal_display_get_screen_number (sequence->display))
                     {
                       sequence->screen = n;
                       changed = TRUE;

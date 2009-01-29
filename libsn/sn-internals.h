@@ -55,6 +55,7 @@ Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
 
 Window     sn_internal_display_get_root_window (SnDisplay              *display,
                                                 int                     number);
+int        sn_internal_display_get_screen_number (SnDisplay *display);
 
 void       sn_internal_display_get_xmessage_data (SnDisplay              *display,
                                                   SnList                **funcs,
