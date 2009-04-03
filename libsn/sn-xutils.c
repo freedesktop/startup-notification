@@ -27,30 +27,24 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#ifdef HAVE_XCB
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#endif
 
 Atom
 sn_internal_atom_get (SnDisplay  *display,
                       const char *atom_name)
 {
-#ifdef HAVE_XCB
     switch (sn_internal_display_get_type (display))
     {
      case SN_DISPLAY_TYPE_XLIB:
-#endif
       return XInternAtom (sn_display_get_x_display (display),
                           atom_name,
                           False);
-#ifdef HAVE_XCB
      case SN_DISPLAY_TYPE_XCB:
       return xcb_atom_get (sn_display_get_x_connection (display),
                            atom_name);
     }
     return None;
-#endif
 }
 
 void
@@ -61,18 +55,15 @@ sn_internal_set_utf8_string (SnDisplay  *display,
 {
   sn_display_error_trap_push (display);
 
-#ifdef HAVE_XCB
   switch (sn_internal_display_get_type (display))
   {
     case SN_DISPLAY_TYPE_XLIB:
-#endif
       XChangeProperty (sn_display_get_x_display (display),
                        xwindow,
                        sn_internal_atom_get (display, property),
                        sn_internal_atom_get (display, "UTF8_STRING"),
                        8, PropModeReplace, (unsigned char*) str,
                        strlen (str));
-#ifdef HAVE_XCB
       break;
      case SN_DISPLAY_TYPE_XCB:
       xcb_change_property (sn_display_get_x_connection (display),
@@ -83,7 +74,6 @@ sn_internal_set_utf8_string (SnDisplay  *display,
                            8, strlen (str), str);
       break;
   }
-#endif
 
   sn_display_error_trap_pop (display);
 }

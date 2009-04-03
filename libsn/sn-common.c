@@ -27,10 +27,8 @@
 #include "sn-common.h"
 #include "sn-internals.h"
 
-#ifdef HAVE_XCB
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
-#endif
 
 struct SnDisplay
 {
@@ -45,7 +43,6 @@ struct SnDisplay
           SnDisplayErrorTrapPush push_trap_func;
           SnDisplayErrorTrapPop  pop_trap_func;
       } xlib;
-#ifdef HAVE_XCB
       struct
       {
           xcb_connection_t *xconnection;
@@ -53,7 +50,6 @@ struct SnDisplay
           SnXcbDisplayErrorTrapPush push_trap_func;
           SnXcbDisplayErrorTrapPop  pop_trap_func;
       } xcb;
-#endif
   } x;
   int n_screens;
   SnList *xmessage_funcs;
@@ -104,7 +100,6 @@ sn_display_new (Display                *xdisplay,
   return display;
 }
 
-#ifdef HAVE_XCB
 /**
  * sn_xcb_display_new:
  * @xdisplay: an X window system display
@@ -148,7 +143,6 @@ sn_xcb_display_new (xcb_connection_t          *xconnection,
 
   return display;
 }
-#endif
 
 /**
  * sn_display_ref:
@@ -179,19 +173,15 @@ sn_display_unref (SnDisplay *display)
         sn_list_free (display->xmessage_funcs);
       if (display->pending_messages)
         sn_list_free (display->pending_messages);
-#ifdef HAVE_XCB
       switch (display->type)
       {
        case SN_DISPLAY_TYPE_XCB:
         sn_free (display->x.xcb.screens);
         break;
        case SN_DISPLAY_TYPE_XLIB:
-#endif
         sn_free (display->x.xlib.screens);
-#ifdef HAVE_XCB
         break;
       }
-#endif
       sn_free (display);
     }
 }
@@ -212,7 +202,6 @@ sn_display_get_x_display (SnDisplay *display)
   return NULL;
 }
 
-#ifdef HAVE_XCB
 /**
  * sn_display_get_x_connection:
  * @display: an #SnDisplay
@@ -228,7 +217,6 @@ sn_display_get_x_connection(SnDisplay *display)
       return display->x.xcb.xconnection;
   return NULL;
 }
-#endif
 
 /**
  * sn_internal_display_get_id:
@@ -241,18 +229,14 @@ sn_display_get_x_connection(SnDisplay *display)
 void *
 sn_internal_display_get_id (SnDisplay *display)
 {
-#ifdef HAVE_XCB
   switch (display->type)
   {
    case SN_DISPLAY_TYPE_XLIB:
-#endif
     return display->x.xlib.xdisplay;
-#ifdef HAVE_XCB
    case SN_DISPLAY_TYPE_XCB:
     return display->x.xcb.xconnection;
   }
   return NULL;
-#endif
 }
 
 /**
@@ -290,17 +274,13 @@ sn_internal_display_get_root_window (SnDisplay *display,
                                      int       number)
 {
     if (number >= 0 && number < display->n_screens)
-#ifdef HAVE_XCB
       switch (display->type)
       {
        case SN_DISPLAY_TYPE_XLIB:
-#endif
         return RootWindow (display->x.xlib.xdisplay, number);
-#ifdef HAVE_XCB
        case SN_DISPLAY_TYPE_XCB:
         return display->x.xcb.screens[number]->root;
       }
-#endif
     return None;
 }
 
@@ -318,7 +298,6 @@ sn_internal_display_get_type (SnDisplay *display)
     return display->type;
 }
 
-#ifdef HAVE_XCB
 /**
  * sn_internal_display_get_x_screen:
  * @display: an #SnDisplay
@@ -338,7 +317,6 @@ sn_internal_display_get_xcb_screen (SnDisplay *display,
   else
     return display->x.xcb.screens[number];
 }
-#endif
 
 /**
  * sn_internal_display_get_screen_number:
@@ -387,7 +365,6 @@ sn_display_process_event (SnDisplay *display,
   return retval;
 }
 
-#ifdef HAVE_XCB
 /**
  * sn_xcb_display_process_event:
  * @display: a display
@@ -420,7 +397,6 @@ sn_xcb_display_process_event (SnDisplay           *display,
 
   return retval;
 }
-#endif
 
 /**
  * sn_display_error_trap_push:
@@ -431,7 +407,6 @@ sn_xcb_display_process_event (SnDisplay           *display,
 void
 sn_display_error_trap_push (SnDisplay *display)
 {
-#ifdef HAVE_XCB
   switch (display->type)
   {
    case SN_DISPLAY_TYPE_XCB:
@@ -439,13 +414,10 @@ sn_display_error_trap_push (SnDisplay *display)
       (* display->x.xcb.push_trap_func) (display, display->x.xcb.xconnection);
     break;
    case SN_DISPLAY_TYPE_XLIB:
-#endif
     if (display->x.xlib.push_trap_func)
       (* display->x.xlib.push_trap_func) (display, display->x.xlib.xdisplay);
-#ifdef HAVE_XCB
     break;
   }
-#endif
 }
 
 /**
@@ -457,7 +429,6 @@ sn_display_error_trap_push (SnDisplay *display)
 void
 sn_display_error_trap_pop  (SnDisplay *display)
 {
-#ifdef HAVE_XCB
   switch (display->type)
   {
    case SN_DISPLAY_TYPE_XCB:
@@ -465,13 +436,10 @@ sn_display_error_trap_pop  (SnDisplay *display)
       (* display->x.xcb.pop_trap_func) (display, display->x.xcb.xconnection);
     break;
    case SN_DISPLAY_TYPE_XLIB:
-#endif
     if (display->x.xlib.pop_trap_func)
       (* display->x.xlib.pop_trap_func) (display, display->x.xlib.xdisplay);
-#ifdef HAVE_XCB
     break;
   }
-#endif
 }
 
 void

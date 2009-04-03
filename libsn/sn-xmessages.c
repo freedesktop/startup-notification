@@ -25,9 +25,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_XCB
 #include <xcb/xcb_event.h>
-#endif
 
 #include "sn-xmessages.h"
 #include "sn-list.h"
@@ -160,11 +158,9 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
       return;
     }
 
-#ifdef HAVE_XCB
   switch (sn_internal_display_get_type (display))
   {
    case SN_DISPLAY_TYPE_XLIB:
-#endif
     {
       Atom type_atom;
       Atom type_atom_begin;
@@ -230,7 +226,6 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
       XDestroyWindow (xdisplay, xwindow);
       XFlush (xdisplay);
     }
-#ifdef HAVE_XCB
     break;
    case SN_DISPLAY_TYPE_XCB:
     {
@@ -290,7 +285,6 @@ sn_internal_broadcast_xmessage   (SnDisplay      *display,
     }
     break;
   }
-#endif
 }
 
 typedef struct
@@ -566,7 +560,6 @@ sn_internal_xmessage_process_event (SnDisplay *display,
   return retval;
 }
 
-#ifdef HAVE_XCB
 sn_bool_t
 sn_xcb_internal_xmessage_process_event (SnDisplay           *display,
                                         xcb_generic_event_t *xevent)
@@ -596,7 +589,6 @@ sn_xcb_internal_xmessage_process_event (SnDisplay           *display,
 
   return retval;
 }
-#endif
 
 static void
 sn_internal_append_to_string_escaped (char      **append_to,

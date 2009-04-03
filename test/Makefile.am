@@ -16,11 +16,7 @@ XCB_TEST=					\
 	test-launcher-xcb			\
 	test-watch-xmessages-xcb
 
-if WITH_XCB
 noinst_PROGRAMS=$(XLIB_TEST) $(XCB_TEST)
-else
-noinst_PROGRAMS=$(XLIB_TEST)
-endif
 
 test_launcher_SOURCES= test-launcher.c
 
@@ -42,7 +38,6 @@ test_watch_xmessages_SOURCES= test-watch-xmessages.c
 
 test_watch_xmessages_LDADD= $(LIBSN_LIBS) $(top_builddir)/libsn/libstartup-notification-1.la
 
-if WITH_XCB
 test_watch_xmessages_xcb_SOURCES= test-watch-xmessages-xcb.c
 
 test_watch_xmessages_xcb_LDADD= $(LIBSN_LIBS) $(top_builddir)/libsn/libstartup-notification-1.la
@@ -62,6 +57,5 @@ test_launchee_xcb_LDADD= $(LIBSN_LIBS) $(top_builddir)/libsn/libstartup-notifica
 test_launcher_xcb_SOURCES= test-launcher-xcb.c
 
 test_launcher_xcb_LDADD= $(LIBSN_LIBS) $(top_builddir)/libsn/libstartup-notification-1.la
-endif
 
 EXTRA_DIST=test-boilerplate.h
