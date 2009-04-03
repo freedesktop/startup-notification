@@ -30,10 +30,6 @@
 #include <X11/Xlib.h>
 #include <xcb/xcb.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 SN_BEGIN_DECLS
 
 #ifndef SN_API_NOT_YET_FROZEN
