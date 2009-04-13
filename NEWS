@@ -1,3 +1,9 @@
+0.10
+====
+
+ - Remove useless functions (Julien Danjou)
+ - Add XCB backend (Julien Danjou)
+
 0.9
 ===
 
