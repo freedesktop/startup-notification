@@ -102,20 +102,19 @@ sn_display_new (Display                *xdisplay,
 
 /**
  * sn_xcb_display_new:
- * @xdisplay: an X window system display
+ * @xdisplay: an X window system connection
  * @push_trap_func: function to push an X error trap
  * @pop_trap_func: function to pop an X error trap
  *
  * Creates a new #SnDisplay object, containing
- * data that libsn associates with an X display.
+ * data that libsn associates with an X connection.
  *
  * @push_trap_func should be a function that causes X errors to be
  * ignored until @pop_trap_func is called as many times as
  * @push_trap_func has been called. (Nested push/pop pairs must be
- * supported.) The outermost @pop_trap_func in a set of nested pairs
- * must call XSync() to ensure that all errors that will occur have in
- * fact occurred. These functions are used to avoid X errors due to
- * BadWindow and such.
+ * supported.)
+ * These functions are used to avoid X errors due to BadWindow and
+ * such.
  *
  * Return value: the new #SnDisplay
  **/
