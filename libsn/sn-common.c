@@ -188,6 +188,8 @@ sn_display_unref (SnDisplay *display)
 /**
  * sn_display_get_x_display:
  * @display: an #SnDisplay
+ * This function only returns a value if the SnDisplay
+ * has been created with sn_display_new().
  * 
  * 
  * 
@@ -204,6 +206,8 @@ sn_display_get_x_display (SnDisplay *display)
 /**
  * sn_display_get_x_connection:
  * @display: an #SnDisplay
+ * This function only returns a value if the SnDisplay
+ * has been created with sn_xcb_display_new().
  *
  *
  *
