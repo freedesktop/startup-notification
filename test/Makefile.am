@@ -16,7 +16,7 @@ XCB_TEST=					\
 	test-launcher-xcb			\
 	test-watch-xmessages-xcb
 
-noinst_PROGRAMS=$(XLIB_TEST) $(XCB_TEST)
+check_PROGRAMS=$(XLIB_TEST) $(XCB_TEST)
 
 test_launcher_SOURCES= test-launcher.c
 
