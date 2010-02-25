@@ -73,6 +73,7 @@ Time        sn_startup_sequence_get_timestamp             (SnStartupSequence *se
 const char* sn_startup_sequence_get_wmclass               (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_binary_name           (SnStartupSequence *sequence);
 const char* sn_startup_sequence_get_icon_name             (SnStartupSequence *sequence);
+const char* sn_startup_sequence_get_application_id        (SnStartupSequence *sequence);
 int         sn_startup_sequence_get_screen                (SnStartupSequence *sequence);
 
 void        sn_startup_sequence_get_initiated_time        (SnStartupSequence *sequence,

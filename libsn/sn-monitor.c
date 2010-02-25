@@ -66,7 +66,8 @@ struct SnStartupSequence
   Time timestamp;
 
   char *binary_name;
-  char *icon_name;  
+  char *icon_name;
+  char *application_id;
 
   unsigned int completed : 1;
   unsigned int canceled : 1;
@@ -269,7 +270,8 @@ sn_startup_sequence_unref (SnStartupSequence *sequence)
       sn_free (sequence->wmclass);
       sn_free (sequence->binary_name);
       sn_free (sequence->icon_name);
-      
+      sn_free (sequence->application_id);
+
       sn_display_unref (sequence->display);
       sn_free (sequence);
     }
@@ -335,6 +337,12 @@ const char*
 sn_startup_sequence_get_icon_name (SnStartupSequence *sequence)
 {
   return sequence->icon_name;
+}
+
+const char*
+sn_startup_sequence_get_application_id (SnStartupSequence *sequence)
+{
+  return sequence->application_id;
 }
 
 int
@@ -805,10 +813,18 @@ xmessage_func (SnDisplay  *display,
                   changed = TRUE;
                 }
             }
+          else if (strcmp (names[i], "APPLICATION_ID") == 0)
+            {
+              if (sequence->application_id == NULL)
+                {
+                  sequence->application_id = sn_internal_strdup (values[i]);
+                  changed = TRUE;
+                }
+            }
           else if (strcmp (names[i], "DESKTOP") == 0)
             {
               int workspace;
-              
+
               workspace = sn_internal_string_to_ulong (values[i]);
 
               sequence->workspace = workspace;

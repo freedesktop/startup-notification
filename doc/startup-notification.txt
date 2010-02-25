@@ -300,6 +300,16 @@ The following keys may be provided optionally in either a "new" or a
           have their window mapped on the desktop specified by
           the value of DESKTOP.
 
+  APPLICATION_ID
+
+          When launching an application using a .desktop file from
+          the normal application paths (see desktop file specification),
+          this should be basename of the .desktop file.
+          For example: "foo.desktop".
+
+          When launching a .desktop file NOT in the paths, this should
+          be an absolute path to the .desktop file.
+
 Some details of the startup sequence:
 
  - "new" and "change" messages are sent by the launcher code
