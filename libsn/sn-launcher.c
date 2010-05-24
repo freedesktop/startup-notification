@@ -78,6 +78,7 @@ sn_launcher_context_new (SnDisplay           *display,
 
   context->refcount = 1;
   context->display = display;
+  context->screen = screen;
   sn_display_ref (context->display);
 
   context->workspace = -1;
