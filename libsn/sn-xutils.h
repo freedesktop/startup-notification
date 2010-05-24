@@ -29,11 +29,9 @@
 
 SN_BEGIN_DECLS
 
-Atom sn_internal_atom_get        (SnDisplay  *display,
-                                  const char *atom_name);
 void sn_internal_set_utf8_string (SnDisplay  *display,
-                                  Window      xwindow,
-                                  const char *property,
+                                  xcb_window_t xwindow,
+                                  xcb_atom_t   property,
                                   const char *str);
 
 

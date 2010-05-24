@@ -196,8 +196,8 @@ sn_launchee_context_complete (SnLauncheeContext *context)
 
   sn_internal_broadcast_xmessage (context->display,
                                   context->screen,
-                                  "_NET_STARTUP_INFO",
-                                  "_NET_STARTUP_INFO_BEGIN",
+                                  sn_internal_get_net_startup_info_atom(context->display),
+                                  sn_internal_get_net_startup_info_begin_atom(context->display),
                                   message);
 
   sn_free (message);
@@ -217,10 +217,10 @@ sn_launchee_context_complete (SnLauncheeContext *context)
  **/
 void
 sn_launchee_context_setup_window (SnLauncheeContext *context,
-                                  Window             xwindow)
+                                  xcb_window_t       xwindow)
 {
   sn_internal_set_utf8_string (context->display,
                                xwindow,
-                               "_NET_STARTUP_ID",
+                               sn_internal_get_net_startup_id_atom(context->display),
                                context->startup_id);
 }

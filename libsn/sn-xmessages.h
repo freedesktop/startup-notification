@@ -48,8 +48,8 @@ void sn_internal_remove_xmessage_func (SnDisplay      *display,
                                        void           *func_data);
 void sn_internal_broadcast_xmessage   (SnDisplay      *display,
                                        int             screen,
-                                       const char     *message_type,
-                                       const char     *message_type_begin,
+                                       xcb_atom_t      message_type,
+                                       xcb_atom_t      message_type_begin,
                                        const char     *message);
 
 char*     sn_internal_serialize_message   (const char   *prefix,

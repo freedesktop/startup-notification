@@ -420,8 +420,8 @@ sn_startup_sequence_complete (SnStartupSequence *sequence)
 
   sn_internal_broadcast_xmessage (sequence->display,
                                   sequence->screen,
-                                  "_NET_STARTUP_INFO",
-                                  "_NET_STARTUP_INFO_BEGIN",
+                                  sn_internal_get_net_startup_info_atom(sequence->display),
+                                  sn_internal_get_net_startup_info_begin_atom(sequence->display),
                                   message);
 
   sn_free (message);

@@ -24,56 +24,26 @@
 
 #include <config.h>
 #include "sn-internals.h"
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
-
-Atom
-sn_internal_atom_get (SnDisplay  *display,
-                      const char *atom_name)
-{
-    switch (sn_internal_display_get_type (display))
-    {
-     case SN_DISPLAY_TYPE_XLIB:
-      return XInternAtom (sn_display_get_x_display (display),
-                          atom_name,
-                          False);
-     case SN_DISPLAY_TYPE_XCB:
-      return xcb_atom_get (sn_display_get_x_connection (display),
-                           atom_name);
-    }
-    return None;
-}
 
 void
 sn_internal_set_utf8_string (SnDisplay  *display,
-                             Window      xwindow,
-                             const char *property,
+                             xcb_window_t xwindow,
+                             xcb_atom_t  property,
                              const char *str)
 {
   sn_display_error_trap_push (display);
 
-  switch (sn_internal_display_get_type (display))
-  {
-    case SN_DISPLAY_TYPE_XLIB:
-      XChangeProperty (sn_display_get_x_display (display),
+  xcb_connection_t *c = sn_display_get_x_connection (display);
+  xcb_atom_t UTF8_STRING = sn_internal_get_utf8_string_atom(display);
+
+  xcb_change_property (c,
+                       XCB_PROP_MODE_REPLACE,
                        xwindow,
-                       sn_internal_atom_get (display, property),
-                       sn_internal_atom_get (display, "UTF8_STRING"),
-                       8, PropModeReplace, (unsigned char*) str,
-                       strlen (str));
-      break;
-     case SN_DISPLAY_TYPE_XCB:
-      xcb_change_property (sn_display_get_x_connection (display),
-                           XCB_PROP_MODE_REPLACE,
-                           xwindow,
-                           sn_internal_atom_get (display, property),
-                           sn_internal_atom_get (display, "UTF8_STRING"),
-                           8, strlen (str), str);
-      break;
-  }
+                       property,
+                       UTF8_STRING,
+                       8, strlen (str), str);
 
   sn_display_error_trap_pop (display);
 }

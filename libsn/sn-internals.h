@@ -49,30 +49,28 @@ SN_BEGIN_DECLS
 #define NULL ((void*) 0)
 #endif
 
-enum SnDisplayType
-{
-    SN_DISPLAY_TYPE_XLIB,
-    SN_DISPLAY_TYPE_XCB
-};
-
 /* --- From sn-common.c --- */
-Screen*    sn_internal_display_get_x_screen    (SnDisplay              *display,
+xcb_screen_t* sn_internal_display_get_x_screen (SnDisplay              *display,
                                                 int                     number);
 
-Window     sn_internal_display_get_root_window (SnDisplay              *display,
-                                                int                     number);
+xcb_window_t sn_internal_display_get_root_window (SnDisplay              *display,
+                                                  int                     number);
+
 int        sn_internal_display_get_screen_number (SnDisplay *display);
 
 void*      sn_internal_display_get_id (SnDisplay *display);
 
-xcb_screen_t* sn_internal_display_get_xcb_screen (SnDisplay              *display,
-                                                  int                     number);
-
-enum SnDisplayType sn_internal_display_get_type (SnDisplay *display);
-
 void       sn_internal_display_get_xmessage_data (SnDisplay              *display,
                                                   SnList                **funcs,
                                                   SnList                **pending);
+
+xcb_atom_t sn_internal_get_utf8_string_atom(SnDisplay *display);
+
+xcb_atom_t sn_internal_get_net_startup_id_atom(SnDisplay *display);
+
+xcb_atom_t sn_internal_get_net_startup_info_atom(SnDisplay *display);
+
+xcb_atom_t sn_internal_get_net_startup_info_begin_atom(SnDisplay *display);
 
 /* --- From sn-monitor.c --- */
 sn_bool_t sn_internal_monitor_process_event (SnDisplay *display);
@@ -95,11 +93,10 @@ void sn_internal_append_to_string (char      **append_to,
                                    const char *append);
 
 /* --- From sn-xmessages.c --- */
-sn_bool_t sn_internal_xmessage_process_event (SnDisplay *display,
-                                              XEvent    *xevent);
-
-sn_bool_t sn_xcb_internal_xmessage_process_event (SnDisplay          *display,
-                                                  xcb_generic_event_t *xevent);
+sn_bool_t sn_internal_xmessage_process_client_message (SnDisplay  *display,
+                                                       xcb_window_t window,
+                                                       xcb_atom_t   type,
+                                                       const char  *data);
 
 SN_END_DECLS
 
