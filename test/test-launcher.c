@@ -25,6 +25,7 @@
 #include <config.h>
 #include <libsn/sn.h>
 #include <assert.h>
+#include <X11/Xatom.h>
 
 #include "test-boilerplate.h"
 
@@ -45,8 +46,6 @@ slowly_obtain_timestamp (SnDisplay *display)
 
   {
     XSetWindowAttributes attrs;
-    Atom atom_name;
-    Atom atom_type;
     char* name;
 
     attrs.override_redirect = True;
@@ -63,15 +62,10 @@ slowly_obtain_timestamp (SnDisplay *display)
                      CWOverrideRedirect | CWEventMask,
                      &attrs);
 
-    atom_name = XInternAtom (xdisplay, "WM_NAME", TRUE);
-    assert (atom_name != None);
-    atom_type = XInternAtom (xdisplay, "STRING", TRUE);
-    assert (atom_type != None);
-
     name = "Fake Window";
     XChangeProperty (xdisplay, 
-                     xwindow, atom_name,
-                     atom_type,
+                     xwindow, XA_WM_NAME,
+                     XA_STRING,
                      8, PropModeReplace, name, strlen (name));
   }
   
