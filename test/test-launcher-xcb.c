@@ -64,7 +64,7 @@ slowly_obtain_timestamp (SnDisplay *display)
     name = "Fake Window";
 
     xcb_change_property (xconnection, XCB_PROP_MODE_REPLACE,
-                         xwindow, WM_NAME, STRING, 8,
+                         xwindow, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
                          strlen (name), name);
   }
 
