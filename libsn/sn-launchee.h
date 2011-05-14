@@ -45,7 +45,7 @@ int                sn_launchee_context_get_id_has_timestamp (SnLauncheeContext *
 Time               sn_launchee_context_get_timestamp        (SnLauncheeContext *context);
 void               sn_launchee_context_complete             (SnLauncheeContext *context);
 void               sn_launchee_context_setup_window         (SnLauncheeContext *context,
-                                                             xcb_window_t       xwindow);
+                                                             Window             xwindow);
 
 SN_END_DECLS
 

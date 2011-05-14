@@ -217,10 +217,10 @@ sn_launchee_context_complete (SnLauncheeContext *context)
  **/
 void
 sn_launchee_context_setup_window (SnLauncheeContext *context,
-                                  xcb_window_t       xwindow)
+                                  Window             xwindow)
 {
   sn_internal_set_utf8_string (context->display,
-                               xwindow,
+                               (xcb_window_t)xwindow,
                                sn_internal_get_net_startup_id_atom(context->display),
                                context->startup_id);
 }
