@@ -1,3 +1,8 @@
+0.12
+====
+
+ - Revert a change that break ABI (Julien Cristau)
+
 0.11
 ====
 
