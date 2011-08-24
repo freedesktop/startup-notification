@@ -78,14 +78,10 @@ fi
 ## try definining HAVE_BACKTRACE
 AC_CHECK_HEADERS(execinfo.h, [AC_CHECK_FUNCS(backtrace)])
 
-PKG_CHECK_MODULES([xcb], [xcb >= 1.6],,
-    [AC_MSG_ERROR([Cannot find xcb])])
-PKG_CHECK_MODULES([xcb_aux], [xcb-aux],,
-    [AC_MSG_ERROR([Cannot find xcb-aux])])
-PKG_CHECK_MODULES([xcb_event], [xcb-event],,
-    [AC_MSG_ERROR([Cannot find xcb-event])])
-PKG_CHECK_MODULES([x11_xcb], [x11-xcb],,
-    [AC_MSG_ERROR([Cannot find x11-xcb])])
+PKG_CHECK_MODULES([xcb], [xcb >= 1.6],,)
+PKG_CHECK_MODULES([xcb_aux], [xcb-aux],,)
+PKG_CHECK_MODULES([xcb_event], [xcb-event],,)
+PKG_CHECK_MODULES([x11_xcb], [x11-xcb],,)
 
 LIBSN_CFLAGS="$xcb_CFLAGS $xcb_aux_CFLAGS $xcb_event_CFLAGS $x11_xcb_CFLAGS"
 LIBSN_LIBS="$xcb_LIBS $xcb_aux_LIBS $x11_xcb_LIBS"
