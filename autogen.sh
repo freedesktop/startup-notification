@@ -64,7 +64,9 @@ autoconf || echo "autoconf failed - version 2.5x is probably required"
 
 cd $ORIGDIR
 
-$srcdir/configure --enable-maintainer-mode "$@"
+if test -z "$NOCONFIGURE"; then
+    $srcdir/configure --enable-maintainer-mode "$@"
+fi
 
 echo 
 echo "Now type 'make' to compile $PROJECT."
