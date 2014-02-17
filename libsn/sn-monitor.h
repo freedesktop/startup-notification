@@ -77,11 +77,11 @@ const char* sn_startup_sequence_get_application_id        (SnStartupSequence *se
 int         sn_startup_sequence_get_screen                (SnStartupSequence *sequence);
 
 void        sn_startup_sequence_get_initiated_time        (SnStartupSequence *sequence,
-                                                           long              *tv_sec,
-                                                           long              *tv_usec);
+                                                           time_t            *tv_sec,
+                                                           suseconds_t       *tv_usec);
 void        sn_startup_sequence_get_last_active_time      (SnStartupSequence *sequence,
-                                                           long              *tv_sec,
-                                                           long              *tv_usec);
+                                                           time_t            *tv_sec,
+                                                           suseconds_t       *tv_usec);
 
 void        sn_startup_sequence_complete                  (SnStartupSequence *sequence);
 

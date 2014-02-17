@@ -364,8 +364,8 @@ sn_startup_sequence_get_screen (SnStartupSequence *sequence)
  **/
 void
 sn_startup_sequence_get_initiated_time (SnStartupSequence *sequence,
-                                        long              *tv_sec,
-                                        long              *tv_usec)
+                                        time_t            *tv_sec,
+                                        suseconds_t       *tv_usec)
 {
   if (tv_sec)
     *tv_sec = sequence->initiation_time.tv_sec;
@@ -386,8 +386,8 @@ sn_startup_sequence_get_initiated_time (SnStartupSequence *sequence,
  **/
 void
 sn_startup_sequence_get_last_active_time (SnStartupSequence *sequence,
-                                          long              *tv_sec,
-                                          long              *tv_usec)
+                                          time_t            *tv_sec,
+                                          suseconds_t       *tv_usec)
 {
   /* for now the same as get_initiated_time */
   if (tv_sec)
