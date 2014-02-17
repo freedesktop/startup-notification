@@ -28,6 +28,7 @@
 #define __SN_MONITOR_H__
 
 #include <libsn/sn-common.h>
+#include <sys/select.h>
 
 SN_BEGIN_DECLS
 
