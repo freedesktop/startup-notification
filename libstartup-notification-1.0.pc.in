@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: libstartup-notification
 Description: Startup notification library
 Version: @VERSION@
+Requires: x11-xcb
 Libs: -L${libdir} -lstartup-notification-1
 Cflags: -I${includedir}/startup-notification-1.0
 
